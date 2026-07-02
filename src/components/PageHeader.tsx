@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { type ReactNode } from 'react'
+import Container from './layout/Container'
 import Badge from './Badge'
 
 interface PageHeaderProps {
@@ -20,42 +21,40 @@ export default function PageHeader({
   children,
 }: PageHeaderProps) {
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 mesh-bg" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/5 rounded-full blur-3xl" />
+    <section className="relative w-full pt-[120px] md:pt-[140px] pb-16 md:pb-20 overflow-hidden">
+      {/* Subtle Background effects */}
+      <div className="absolute inset-0 mesh-bg opacity-70" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <Container>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="space-y-6"
+          className="flex flex-col items-center text-center w-full max-w-4xl mx-auto space-y-6"
         >
           {badge && (
-            <div className="flex justify-center">
-              <Badge variant={badgeVariant} size="md">{badge}</Badge>
-            </div>
+            <Badge variant={badgeVariant} size="md">{badge}</Badge>
           )}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight">
             {title}
             {titleHighlight && (
-              <>
-                {' '}
-                <span className="gradient-text">{titleHighlight}</span>
-              </>
+              <span className="gradient-text"> {titleHighlight}</span>
             )}
           </h1>
-          <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          
+          <p className="text-base md:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
             {description}
           </p>
+          
           {children && (
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 w-full">
               {children}
             </div>
           )}
         </motion.div>
-      </div>
+      </Container>
     </section>
   )
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Zap, X, Code, Mail } from 'lucide-react'
+import Container from './layout/Container'
 
 const productLinks = [
   { label: 'Home', to: '/' },
@@ -26,43 +27,47 @@ const legalLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-white/5 bg-[#05050a]">
-      <div className="absolute inset-0 mesh-bg opacity-50 pointer-events-none" />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer className="relative bg-[#05050a] pt-20 pb-10 overflow-hidden">
+      {/* Top glowing separator */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-24 bg-indigo-500/10 blur-[80px] pointer-events-none" />
+      
+      <div className="absolute inset-0 mesh-bg opacity-30 pointer-events-none" />
+      <Container className="relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 mb-4 group">
+            <Link to="/" className="flex items-center gap-2.5 mb-4 group w-max">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <Zap size={18} className="text-white" fill="white" />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-bold text-white text-base tracking-tight">SyncFrame</span>
-                <span className="text-[10px] text-indigo-400 font-medium tracking-widest uppercase">Studio</span>
+              <div className="flex flex-col justify-center">
+                <span className="font-bold text-white text-base tracking-tight leading-tight">SyncFrame</span>
+                <span className="text-[10px] text-indigo-400 font-medium tracking-widest uppercase leading-none mt-[1px]">Studio</span>
               </div>
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               A powerful desktop studio for creating perfectly synced videos from audio, images, timestamps, and batch workflows.
             </p>
-            <div className="flex items-center gap-3 mt-6">
+            <div className="flex items-center gap-4 mt-8">
               <a
                 href="#"
                 aria-label="Twitter"
-                className="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <X size={16} />
               </a>
               <a
                 href="#"
                 aria-label="GitHub"
-                className="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Code size={16} />
               </a>
               <a
                 href="mailto:hello@syncframestudio.com"
                 aria-label="Email"
-                className="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Mail size={16} />
               </a>
@@ -71,11 +76,11 @@ export default function Footer() {
 
           {/* Product */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4 tracking-wide">Product</h4>
-            <ul className="space-y-3">
+            <h4 className="text-indigo-400 font-bold text-xs uppercase tracking-[0.15em] mb-6">Product</h4>
+            <ul className="space-y-4">
               {productLinks.map(({ label, to }) => (
                 <li key={to}>
-                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-colors duration-200">
+                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-all duration-300 hover:translate-x-1 inline-block">
                     {label}
                   </Link>
                 </li>
@@ -85,11 +90,11 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4 tracking-wide">Resources</h4>
-            <ul className="space-y-3">
+            <h4 className="text-indigo-400 font-bold text-xs uppercase tracking-[0.15em] mb-6">Resources</h4>
+            <ul className="space-y-4">
               {resourceLinks.map(({ label, to }) => (
                 <li key={label}>
-                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-colors duration-200">
+                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-all duration-300 hover:translate-x-1 inline-block">
                     {label}
                   </Link>
                 </li>
@@ -99,11 +104,11 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4 tracking-wide">Legal</h4>
-            <ul className="space-y-3">
+            <h4 className="text-indigo-400 font-bold text-xs uppercase tracking-[0.15em] mb-6">Legal</h4>
+            <ul className="space-y-4">
               {legalLinks.map(({ label, to }) => (
                 <li key={label}>
-                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-colors duration-200">
+                  <Link to={to} className="text-slate-400 hover:text-white text-sm transition-all duration-300 hover:translate-x-1 inline-block">
                     {label}
                   </Link>
                 </li>
@@ -118,10 +123,10 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-500 text-xs">All systems operational</span>
+            <span className="text-slate-500 text-xs font-medium">All systems operational</span>
           </div>
         </div>
-      </div>
+      </Container>
     </footer>
   )
 }

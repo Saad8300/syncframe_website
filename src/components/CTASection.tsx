@@ -2,6 +2,8 @@ import { type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import Container from './layout/Container'
+import Section from './layout/Section'
 
 interface CTASectionProps {
   title: string
@@ -27,15 +29,15 @@ export default function CTASection({
   children,
 }: CTASectionProps) {
   return (
-    <section className="relative py-24 overflow-hidden">
+    <Section className="relative overflow-hidden w-full">
       {/* Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-500/8 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-violet-500/8 rounded-full blur-2xl" />
       </div>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <Container className="relative z-10 max-w-4xl text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -52,10 +54,7 @@ export default function CTASection({
           <h2 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
             {title}
             {titleHighlight && (
-              <>
-                {' '}
-                <span className="gradient-text">{titleHighlight}</span>
-              </>
+              <span className="gradient-text"> {titleHighlight}</span>
             )}
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">{description}</p>
@@ -73,7 +72,7 @@ export default function CTASection({
           </div>
           {children}
         </motion.div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   )
 }

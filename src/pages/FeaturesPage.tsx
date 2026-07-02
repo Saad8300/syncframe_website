@@ -1,10 +1,13 @@
+import { motion } from 'framer-motion'
 import {
   Film, Layers, Image, Video, FileText, Merge, BookTemplate,
-  History, Cpu, Webhook, Unlock, Coins, BarChart2, Zap
+  History, Cpu, Unlock, Coins, BarChart2, Zap
 } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import FeatureCard from '../components/FeatureCard'
 import CTASection from '../components/CTASection'
+import Container from '../components/layout/Container'
+import Section from '../components/layout/Section'
 
 const features = [
   {
@@ -64,76 +67,64 @@ const features = [
     color: 'emerald' as const,
     badge: 'Privacy First',
   },
-  {
-    icon: <Webhook size={22} />,
-    title: 'n8n Webhook Automation',
-    description: 'Trigger video generation pipelines from external automation tools like n8n. Receive webhook notifications on completion.',
-    color: 'amber' as const,
-    badge: 'Pro+',
-  },
-  {
-    icon: <Unlock size={22} />,
-    title: 'Plan-Based Tool Unlocks',
-    description: 'Tools and capabilities automatically unlock based on your subscription tier when you log in with your account.',
-    color: 'violet' as const,
-  },
-  {
-    icon: <Coins size={22} />,
-    title: 'Credit System',
-    description: 'Each plan includes monthly credits. Credits are consumed per export. Purchase more credits or upgrade your plan anytime.',
-    color: 'amber' as const,
-  },
 ]
 
 const platformFeatures = [
   { icon: <BarChart2 size={20} />, title: '720p – 4K Export', desc: 'Choose export resolution based on your plan: 720p, 1080p, 2K, or 4K.' },
   { icon: <Zap size={20} />, title: 'Fast Local Processing', desc: 'No round-trips to the cloud. Rendering speed limited only by your hardware.' },
-  { icon: <Unlock size={20} />, title: 'Commercial Use Ready', desc: 'Ultra plan includes commercial usage rights for all video exports.' },
+  { icon: <Unlock size={20} />, title: 'Commercial Use Ready', desc: 'Agency plan includes commercial usage rights for all video exports.' },
 ]
 
 export default function FeaturesPage() {
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PageHeader
         badge="Full Feature Set"
         badgeVariant="violet"
         title="Every tool you need"
         titleHighlight="in one studio."
-        description="SyncFrame Studio packs a complete video creation suite into a native desktop app. Build timelines, run batch jobs, automate with webhooks, and export in professional quality."
+        description="SyncFrame Studio packs a complete video creation suite into a native desktop app. Build timelines, run batch jobs, and export in professional quality."
       />
 
       {/* Feature Grid */}
-      <section className="relative pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <Section className="!pt-0">
+        <Container>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feat, i) => (
               <FeatureCard key={feat.title} {...feat} index={i} />
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* Platform Details */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 mesh-bg" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">Platform details</h2>
-            <p className="text-slate-400">Built for professional creators who need reliability and speed.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
+      <Section
+        title="Platform details"
+        subtitle="Built for professional creators who need reliability and speed."
+        className="bg-black/20"
+      >
+        <Container>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {platformFeatures.map((pf, i) => (
-              <div key={pf.title} className="p-6 rounded-2xl glass border border-white/5 text-center">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-4">
+              <motion.div 
+                key={pf.title} 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group p-5 md:p-6 rounded-3xl bg-[#0a0a0f] border border-white/5 text-center flex flex-col h-full hover:border-indigo-500/30 hover:-translate-y-2 transition-all duration-300 shadow-xl relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all duration-300">
                   {pf.icon}
                 </div>
-                <h3 className="text-white font-semibold mb-2">{pf.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{pf.desc}</p>
-              </div>
+                <h3 className="text-white font-bold text-[17px] mb-2">{pf.title}</h3>
+                <p className="text-slate-400 text-[13px] leading-relaxed flex-1">{pf.desc}</p>
+              </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       <CTASection
         title="Ready to build your"

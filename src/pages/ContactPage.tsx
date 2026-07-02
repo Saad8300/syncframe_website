@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, MessageSquare, Building2, ChevronDown, ChevronUp, Send } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
+import Container from '../components/layout/Container'
+import Section from '../components/layout/Section'
 
 const faqs = [
   {
@@ -30,18 +32,11 @@ const faqs = [
   },
 ]
 
-function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
+function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
-      className="border-b border-white/5 last:border-0"
-    >
+    <div className="border-b border-white/5 last:border-0">
       <button
-        id={`faq-toggle-${index}`}
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between py-5 text-left group"
       >
@@ -50,17 +45,21 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
           {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </span>
       </button>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="pb-5"
-        >
-          <p className="text-slate-400 text-sm leading-relaxed">{a}</p>
-        </motion.div>
-      )}
-    </motion.div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pb-5">
+              <p className="text-slate-400 text-sm leading-relaxed">{a}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -75,7 +74,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PageHeader
         badge="Contact & Support"
         badgeVariant="blue"
@@ -84,30 +83,26 @@ export default function ContactPage() {
         description="Have a question, bug report, or business inquiry? Reach out and we'll get back to you promptly."
       />
 
-      <section className="relative pb-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <Section className="!pt-0">
+        <Container className="max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
 
             {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+            <div className="w-full">
               <h2 className="text-2xl font-bold text-white mb-6">Send a message</h2>
 
               {submitted ? (
-                <div className="p-8 rounded-2xl glass border border-emerald-500/20 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-4">
+                <div className="p-8 rounded-2xl glass-strong border border-emerald-500/20 text-center flex flex-col items-center justify-center min-h-[400px]">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-5">
                     <Send size={24} />
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-2">Message sent!</h3>
+                  <h3 className="text-white font-bold text-xl mb-2">Message sent!</h3>
                   <p className="text-slate-400 text-sm">We'll get back to you within 24–48 hours.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+                <form onSubmit={handleSubmit} className="space-y-5 p-6 md:p-8 rounded-2xl glass border border-white/5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="w-full flex flex-col">
                       <label htmlFor="contact-name" className="block text-slate-400 text-sm font-medium mb-2">Name</label>
                       <input
                         id="contact-name"
@@ -116,10 +111,10 @@ export default function ContactPage() {
                         value={form.name}
                         onChange={e => setForm({ ...form, name: e.target.value })}
                         placeholder="Your name"
-                        className="w-full px-4 py-3 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/40 transition-all"
                       />
                     </div>
-                    <div>
+                    <div className="w-full flex flex-col">
                       <label htmlFor="contact-email" className="block text-slate-400 text-sm font-medium mb-2">Email</label>
                       <input
                         id="contact-email"
@@ -128,18 +123,18 @@ export default function ContactPage() {
                         value={form.email}
                         onChange={e => setForm({ ...form, email: e.target.value })}
                         placeholder="you@example.com"
-                        className="w-full px-4 py-3 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/40 transition-all"
                       />
                     </div>
                   </div>
-                  <div>
+                  <div className="w-full flex flex-col">
                     <label htmlFor="contact-subject" className="block text-slate-400 text-sm font-medium mb-2">Subject</label>
                     <select
                       id="contact-subject"
                       required
                       value={form.subject}
                       onChange={e => setForm({ ...form, subject: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl glass border border-white/8 text-white text-sm bg-transparent focus:outline-none focus:border-indigo-500/50 transition-all appearance-none"
+                      className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500/50 focus:bg-black/40 transition-all appearance-none"
                     >
                       <option value="" disabled className="bg-[#09090f]">Select a subject</option>
                       <option value="support" className="bg-[#09090f]">Technical Support</option>
@@ -150,7 +145,7 @@ export default function ContactPage() {
                       <option value="other" className="bg-[#09090f]">Other</option>
                     </select>
                   </div>
-                  <div>
+                  <div className="w-full flex flex-col">
                     <label htmlFor="contact-message" className="block text-slate-400 text-sm font-medium mb-2">Message</label>
                     <textarea
                       id="contact-message"
@@ -159,74 +154,70 @@ export default function ContactPage() {
                       value={form.message}
                       onChange={e => setForm({ ...form, message: e.target.value })}
                       placeholder="Describe your question or issue..."
-                      className="w-full px-4 py-3 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all resize-none"
+                      className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/40 transition-all resize-none"
                     />
                   </div>
-                  <button id="contact-submit" type="submit" className="btn-primary w-full justify-center py-3.5">
+                  <button id="contact-submit" type="submit" className="btn-primary w-full justify-center py-4">
                     <Send size={16} />
                     Send Message
                   </button>
-                  <p className="text-slate-600 text-xs text-center">
+                  <p className="text-slate-600 text-[11px] text-center pt-2">
                     This is a frontend placeholder. Real email sending will be enabled post-launch.
                   </p>
                 </form>
               )}
-            </motion.div>
+            </div>
 
             {/* Support Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="space-y-6"
-            >
+            <div className="w-full space-y-5 lg:pt-14">
               <h2 className="text-2xl font-bold text-white mb-6">Other ways to reach us</h2>
 
-              <div className="p-5 rounded-2xl glass border border-white/5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
-                  <Mail size={18} />
+              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                  <Mail size={20} />
                 </div>
-                <div>
-                  <h3 className="text-white font-semibold text-sm mb-1">Support Email</h3>
+                <div className="w-full flex flex-col pt-1">
+                  <h3 className="text-white font-semibold mb-1">Support Email</h3>
                   <p className="text-slate-400 text-sm">support@syncframestudio.com</p>
                   <p className="text-slate-500 text-xs mt-1">Response time: 24–48 hours</p>
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl glass border border-white/5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare size={18} />
+              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+                <div className="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare size={20} />
                 </div>
-                <div>
-                  <h3 className="text-white font-semibold text-sm mb-1">Community (Coming Soon)</h3>
+                <div className="w-full flex flex-col pt-1">
+                  <h3 className="text-white font-semibold mb-1">Community (Coming Soon)</h3>
                   <p className="text-slate-400 text-sm">A Discord server and community forum are planned for launch.</p>
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl glass border border-white/5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
-                  <Building2 size={18} />
+              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
+                  <Building2 size={20} />
                 </div>
-                <div>
-                  <h3 className="text-white font-semibold text-sm mb-1">Business Inquiries</h3>
+                <div className="w-full flex flex-col pt-1">
+                  <h3 className="text-white font-semibold mb-1">Business Inquiries</h3>
                   <p className="text-slate-400 text-sm">hello@syncframestudio.com</p>
                   <p className="text-slate-500 text-xs mt-1">Partnerships, press, licensing, and enterprise</p>
                 </div>
               </div>
-            </motion.div>
-          </div>
-
-          {/* FAQ */}
-          <div className="mt-20">
-            <h2 className="text-2xl font-bold text-white text-center mb-10">Frequently asked questions</h2>
-            <div className="max-w-2xl mx-auto glass rounded-2xl border border-white/5 px-6">
-              {faqs.map((item, i) => (
-                <FAQItem key={i} q={item.q} a={item.a} index={i} />
-              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
+
+      {/* FAQ */}
+      <Section title="Frequently asked questions" className="bg-black/20">
+        <Container className="max-w-3xl">
+          <div className="glass rounded-2xl border border-white/5 px-6 md:px-8 py-2">
+            {faqs.map((item, i) => (
+              <FAQItem key={i} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </Container>
+      </Section>
     </div>
   )
 }
