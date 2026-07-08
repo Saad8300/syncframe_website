@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Zap, LayoutDashboard, LogOut, ChevronDown, Shield, Sun, Moon } from 'lucide-react'
 import Container from './layout/Container'
+import SyncFrameLogo from './SyncFrameLogo'
 import { useAuth } from '../contexts/AuthContext'
 
 const publicLinks = [
@@ -68,15 +69,7 @@ export default function Navbar() {
         <Container>
           <div className="flex items-center justify-between h-[72px]">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
-                <Zap size={16} className="text-white" fill="white" />
-              </div>
-              <div className="flex flex-col justify-center">
-                <span className="font-bold text-white text-[15px] tracking-tight leading-tight">SyncFrame</span>
-                <span className="text-[10px] text-indigo-400 font-medium tracking-widest uppercase leading-none mt-[1px]">Studio</span>
-              </div>
-            </Link>
+            <SyncFrameLogo size="md" subtitle="STUDIO" />
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center justify-center flex-1 mx-8 gap-1">

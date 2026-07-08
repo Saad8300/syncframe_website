@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Zap, X, Code, Mail } from 'lucide-react'
+import { X, Code, Mail } from 'lucide-react'
 import Container from './layout/Container'
+import SyncFrameLogo from './SyncFrameLogo'
 
 const productLinks = [
   { label: 'Home', to: '/' },
@@ -37,15 +38,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 mb-4 group w-max">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <Zap size={18} className="text-white" fill="white" />
-              </div>
-              <div className="flex flex-col justify-center">
-                <span className="font-bold text-white text-base tracking-tight leading-tight">SyncFrame</span>
-                <span className="text-[10px] text-indigo-400 font-medium tracking-widest uppercase leading-none mt-[1px]">Studio</span>
-              </div>
-            </Link>
+            <SyncFrameLogo size="md" subtitle="STUDIO" className="mb-4 w-max" />
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               A powerful desktop studio for creating perfectly synced videos from audio, images, timestamps, and batch workflows.
             </p>

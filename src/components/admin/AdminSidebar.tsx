@@ -3,6 +3,7 @@ import {
   FileText, Users, Tag, Settings, CreditCard,
   LayoutDashboard, ArrowLeft, Shield, Zap, DownloadCloud, BookOpen
 } from 'lucide-react'
+import SyncFrameLogo from '../SyncFrameLogo'
 
 export type TabId = 'overview' | 'requests' | 'members' | 'coupons' | 'plans' | 'accounts' | 'releases' | 'changelog'
 
@@ -46,20 +47,14 @@ const navSections = [
 
 export default function AdminSidebar({ activeTab, onTabChange, pendingCount, adminEmail }: AdminSidebarProps) {
   return (
-    <aside className="w-64 flex-shrink-0 h-screen sticky top-0 bg-slate-50 border-r border-slate-200 flex flex-col overflow-y-auto">
+    <aside className="w-[232px] flex-shrink-0 h-dvh bg-white flex flex-col z-40 relative">
       {/* Logo Area */}
-      <div className="p-5 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 flex items-center justify-center shadow-none shadow-indigo-200 border border-indigo-600">
-          <Zap size={18} className="text-slate-900 drop-shadow-sm" fill="currentColor" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-slate-900 font-bold text-sm tracking-tight leading-tight">SyncFrame</span>
-          <span className="text-indigo-700 text-[11px] font-semibold tracking-wide uppercase">Admin Console</span>
-        </div>
+      <div className="p-5">
+        <SyncFrameLogo size="admin" subtitle="ADMIN CONSOLE" theme="light" linkTo={null} />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6">
+      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto custom-scrollbar overscroll-contain">
         {navSections.map(section => (
           <div key={section.title}>
             <div className="px-3 mb-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">

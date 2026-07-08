@@ -35,10 +35,10 @@ export const PLANS: Plan[] = [
   {
     id: 'starter',
     display_name: 'Starter',
-    price_pkr: 499,
-    price_label: 'Rs 499',
-    monthly_credits: 1500,
-    credits_note: '1,500 credits / month',
+    price_pkr: 0,
+    price_label: '',
+    monthly_credits: 0,
+    credits_note: '',
     features: [
       '1,500 monthly credits',
       '1080p export quality',
@@ -53,10 +53,10 @@ export const PLANS: Plan[] = [
   {
     id: 'pro',
     display_name: 'Pro',
-    price_pkr: 1499,
-    price_label: 'Rs 1,499',
-    monthly_credits: 6000,
-    credits_note: '6,000 credits / month',
+    price_pkr: 0,
+    price_label: '',
+    monthly_credits: 0,
+    credits_note: '',
     features: [
       '6,000 monthly credits',
       '2K export quality',
@@ -72,10 +72,10 @@ export const PLANS: Plan[] = [
   {
     id: 'agency',
     display_name: 'Agency',
-    price_pkr: 2999,
-    price_label: 'Rs 2,999',
-    monthly_credits: 10000,
-    credits_note: '10,000 credits / month',
+    price_pkr: 0,
+    price_label: '',
+    monthly_credits: 0,
+    credits_note: '',
     features: [
       '10,000 monthly credits',
       '4K export quality',
@@ -92,18 +92,7 @@ export const PLANS: Plan[] = [
   },
 ]
 
-export const PLAN_AMOUNT_PKR: Record<string, number> = {
-  starter: 499,
-  pro: 1499,
-  agency: 2999,
-}
 
-export const PLAN_CREDITS: Record<string, number> = {
-  free: 30,
-  starter: 1500,
-  pro: 6000,
-  agency: 10000,
-}
 
 export function getPlanById(id: string): Plan {
   return PLANS.find(p => p.id === id) ?? PLANS[0]

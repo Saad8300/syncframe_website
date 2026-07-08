@@ -43,7 +43,7 @@ export default function UpgradePage() {
       const paidStatic = PLANS.filter(p => p.id !== 'free')
 
       if (!supabase) {
-        setMergedPlans(paidStatic.map(p => ({ ...p, is_popular: !!p.highlighted })))
+        setMergedPlans([])
         setLoadingPlans(false)
         return
       }
@@ -63,21 +63,21 @@ export default function UpgradePage() {
                 ...staticPlan,
                 display_name: dbPlan.display_name || staticPlan.display_name,
                 price_pkr: dbPlan.price_pkr,
-                price_label: dbPlan.price_label || staticPlan.price_label,
+                price_label: dbPlan.price_pkr > 0 ? `Rs ${dbPlan.price_pkr.toLocaleString()}` : 'Free',
                 monthly_credits: dbPlan.monthly_credits,
-                credits_note: dbPlan.short_description || staticPlan.credits_note,
+                credits_note: dbPlan.short_description || `${dbPlan.monthly_credits.toLocaleString()} credits / month`,
                 is_popular: dbPlan.is_popular,
                 highlighted: dbPlan.is_popular,
               }
             }
-            return { ...staticPlan, is_popular: !!staticPlan.highlighted }
-          })
+            return null
+          }).filter(Boolean) as MergedPlan[]
           setMergedPlans(merged)
         } else {
-          setMergedPlans(paidStatic.map(p => ({ ...p, is_popular: !!p.highlighted })))
+          setMergedPlans([])
         }
       } catch {
-        setMergedPlans(paidStatic.map(p => ({ ...p, is_popular: !!p.highlighted })))
+        setMergedPlans([])
       } finally {
         setLoadingPlans(false)
       }
@@ -160,6 +160,11 @@ export default function UpgradePage() {
               {[1, 2, 3].map(i => (
                 <div key={i} className="h-96 rounded-3xl bg-surface-850 animate-pulse" />
               ))}
+            </div>
+          ) : mergedPlans.length === 0 ? (
+            <div className="text-center py-20 bg-surface-850 rounded-3xl border border-white/10 shadow-xl">
+              <h2 className="text-xl font-bold text-white mb-2">Pricing Unavailable</h2>
+              <p className="text-slate-400">We could not load the plans from our database. Please check your network or contact support.</p>
             </div>
           ) : (
             <motion.div
@@ -251,7 +256,7 @@ export default function UpgradePage() {
           )}
 
           {/* Continue CTA */}
-          {!loadingPlans && (
+          {!loadingPlans && mergedPlans.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -282,7 +287,7 @@ export default function UpgradePage() {
           )}
 
           {/* Comparison hint */}
-          {!loadingPlans && (
+          {!loadingPlans && mergedPlans.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

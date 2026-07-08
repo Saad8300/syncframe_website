@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 // Tab components
 import AdminSidebar, { TabId } from '../components/admin/AdminSidebar'
 import AdminHeader from '../components/admin/AdminHeader'
+import SyncFrameLogo from '../components/SyncFrameLogo'
 import OverviewTab from '../components/admin/OverviewTab'
 import PaymentRequestsTab from '../components/admin/PaymentRequestsTab'
 import MembersTab from '../components/admin/MembersTab'
@@ -255,7 +256,7 @@ export default function AdminPage() {
 
   return (
     // Force light theme on entire admin panel regardless of public site theme
-    <div className="min-h-screen flex bg-slate-50 text-slate-800">
+    <div className="h-dvh overflow-hidden flex bg-slate-50 text-slate-800">
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -276,16 +277,11 @@ export default function AdminPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-dvh bg-slate-50">
 
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <Zap size={14} className="text-slate-900" fill="white" />
-            </div>
-            <span className="font-bold text-slate-900 text-sm">Admin Console</span>
-          </div>
+          <SyncFrameLogo size="admin" subtitle="ADMIN CONSOLE" theme="light" linkTo={null} />
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-slate-100">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -316,7 +312,7 @@ export default function AdminPage() {
         />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto px-6 lg:px-8 py-6">
+        <main className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain px-6 lg:px-8 py-6">
           {activeTab === 'overview' && (
             <OverviewTab
               requests={requests}

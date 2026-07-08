@@ -84,16 +84,16 @@ export default function PricingPage() {
             if (dbPlan) {
               return {
                 ...staticPlan,
-                display_name: dbPlan.display_name,
+                display_name: dbPlan.display_name || staticPlan.display_name,
                 price_pkr: dbPlan.price_pkr,
-                price_label: dbPlan.price_label || (dbPlan.price_pkr > 0 ? `Rs ${dbPlan.price_pkr}` : 'Free'),
+                price_label: dbPlan.price_pkr > 0 ? `Rs ${dbPlan.price_pkr.toLocaleString()}` : 'Free',
                 monthly_credits: dbPlan.monthly_credits,
-                credits_note: dbPlan.short_description || staticPlan.credits_note,
+                credits_note: dbPlan.short_description || `${dbPlan.monthly_credits.toLocaleString()} credits / month`,
                 highlighted: dbPlan.is_popular
               }
             }
-            return staticPlan
-          })
+            return null
+          }).filter(Boolean) as typeof PLANS
           setPlans(merged)
         }
       } catch (err) {

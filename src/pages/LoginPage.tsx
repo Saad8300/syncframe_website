@@ -4,6 +4,7 @@ import { Mail, Eye, EyeOff, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Z
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Container from '../components/layout/Container'
+import SyncFrameLogo from '../components/SyncFrameLogo'
 
 type Mode = 'login' | 'signup' | 'reset'
 
@@ -129,12 +130,9 @@ export default function LoginPage() {
           transition={{ duration: 0.4 }}
         >
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 justify-center mb-8">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <Zap size={18} className="text-white" fill="white" />
-            </div>
-            <span className="font-bold text-white text-lg tracking-tight">SyncFrame Studio</span>
-          </Link>
+          <div className="flex justify-center mb-8">
+            <SyncFrameLogo size="lg" linkTo="/" subtitle="STUDIO" />
+          </div>
 
           <div className="glass-strong rounded-3xl border border-white/8 p-8">
             {/* Mode Tabs */}

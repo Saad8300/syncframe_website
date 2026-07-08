@@ -168,9 +168,9 @@ export default function CheckoutPage() {
                     ...staticPlan,
                     display_name: dbPlan.display_name || staticPlan.display_name,
                     price_pkr: dbPlan.price_pkr,
-                    price_label: dbPlan.price_label || staticPlan.price_label,
+                    price_label: dbPlan.price_pkr > 0 ? `Rs ${dbPlan.price_pkr.toLocaleString()}` : 'Free',
                     monthly_credits: dbPlan.monthly_credits,
-                    credits_note: dbPlan.short_description || staticPlan.credits_note,
+                    credits_note: dbPlan.short_description || `${dbPlan.monthly_credits.toLocaleString()} credits / month`,
                   } as Plan
                 }
                 return null
@@ -523,12 +523,12 @@ export default function CheckoutPage() {
   const selectedAccount = accounts.find(a => a.id === selectedAccountId)
 
   return (
-    <div className="w-full min-h-screen pt-[72px]">
-      <div className="py-10 md:py-16">
-        <Container className="max-w-6xl">
+    <div className="w-full min-h-screen pt-[72px] pb-16">
+      <div className="py-8 md:py-12">
+        <Container className="max-w-7xl">
 
           {!resolvedPlan && !dataLoading ? (
-            <div className="text-center py-20 bg-surface-850 rounded-3xl border border-white/10 shadow-xl">
+            <div className="text-center py-20 bg-surface-850 rounded-2xl border border-white/10 shadow-xl max-w-2xl mx-auto">
               <AlertCircle size={40} className="text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-white mb-2">Checkout Unavailable</h2>
               <p className="text-slate-400 mb-6">We could not load the requested plan from our database. It may be unavailable or there is a network issue.</p>
@@ -542,548 +542,470 @@ export default function CheckoutPage() {
           ) : (
             <>
               {/* Header with back link and step indicator */}
-              <div className="mb-10">
+              <div className="mb-8 flex items-center justify-between">
+                {/* Step indicator */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check size={12} strokeWidth={3} className="text-white" />
+                    </div>
+                    <span className="text-sm text-slate-400 font-medium hidden sm:inline">Plan Selected</span>
+                  </div>
+                  <div className="w-8 h-[2px] bg-white/10 hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <span className="text-white text-[11px] font-bold">2</span>
+                    </div>
+                    <span className="text-sm font-semibold text-white">Checkout</span>
+                  </div>
+                </div>
+
                 <button
+                  type="button"
                   onClick={() => navigate(`/upgrade?plan=${resolvedPlan?.id || ''}`)}
-                  className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-6"
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={14} />
                   Change plan
                 </button>
-
-            {/* Step indicator */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
-                  <Check size={13} strokeWidth={3} className="text-white" />
-                </div>
-                <span className="text-sm text-slate-400">Plan Selected</span>
               </div>
-              <ChevronRight size={16} className="text-slate-600" />
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">2</span>
-                </div>
-                <span className="text-sm font-semibold text-white">Checkout</span>
-              </div>
-            </div>
-          </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+              <form onSubmit={handleSubmit}>
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-10">
 
-              {/* ── LEFT: Main form ──────────────────────────────────── */}
-              <div className="flex-1 min-w-0 space-y-8">
+                  {/* ── LEFT: Main form (approx 65%) ──────────────────────────────────── */}
+                  <div className="w-full lg:w-[65%] xl:w-[68%] space-y-6">
 
-                {/* Global submit error */}
-                {submitError && (
-                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400">
-                    <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
-                    <p className="text-sm font-medium">{submitError}</p>
-                  </div>
-                )}
-
-                {/* ── Section 1: Customer Details ─────────────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">1</span>
-                    Customer Details
-                  </h2>
-
-                  <div className="space-y-4">
-                    <div>
-                      <FieldLabel htmlFor="fullName" required>Full Name</FieldLabel>
-                      <input
-                        id="fullName"
-                        type="text"
-                        value={fullName}
-                        onChange={e => setFullName(e.target.value)}
-                        placeholder="e.g. Ahmed Khan"
-                        className={inputCls(!!fieldErrors.fullName)}
-                      />
-                      {fieldErrors.fullName && (
-                        <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.fullName}</p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <FieldLabel htmlFor="email" required>Email Address</FieldLabel>
-                        <input
-                          id="email"
-                          type="email"
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          placeholder="you@example.com"
-                          className={inputCls(!!fieldErrors.email)}
-                        />
-                        {fieldErrors.email && (
-                          <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.email}</p>
-                        )}
+                    {/* Global submit error */}
+                    {submitError && (
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+                        <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                        <p className="text-sm font-medium">{submitError}</p>
                       </div>
-                      <div>
-                        <FieldLabel htmlFor="phone" required>Phone Number</FieldLabel>
-                        <input
-                          id="phone"
-                          type="tel"
-                          value={phone}
-                          onChange={e => setPhone(e.target.value)}
-                          placeholder="03001234567"
-                          className={inputCls(!!fieldErrors.phone)}
-                        />
-                        {fieldErrors.phone && (
-                          <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.phone}</p>
-                        )}
-                        {!fieldErrors.phone && phone && isValidPhone(phone) && (
-                          <p className="mt-1.5 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 size={12} />Valid number</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </section>
+                    )}
 
-                {/* ── Section 2: Coupon ───────────────────────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">2</span>
-                    Coupon Code
-                    <span className="text-slate-500 text-xs font-normal ml-1">(Optional)</span>
-                  </h2>
+                    {/* ── Section 1: Customer Details ─────────────────────── */}
+                    <section className="bg-surface-850 rounded-2xl border border-white/5 p-5 sm:p-6">
+                      <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] flex items-center justify-center">1</span>
+                        Customer Details
+                      </h2>
 
-                  {appliedCoupon && couponResult?.valid ? (
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                          <Tag size={15} className="text-green-400" />
-                        </div>
+                      <div className="space-y-4">
                         <div>
-                          <p className="text-sm font-bold text-green-400">{appliedCoupon}</p>
-                          {couponResult.description && (
-                            <p className="text-xs text-green-500">{couponResult.description}</p>
+                          <FieldLabel htmlFor="fullName" required>Full Name</FieldLabel>
+                          <input
+                            id="fullName"
+                            type="text"
+                            value={fullName}
+                            onChange={e => setFullName(e.target.value)}
+                            placeholder="e.g. Ahmed Khan"
+                            className={inputCls(!!fieldErrors.fullName)}
+                          />
+                          {fieldErrors.fullName && (
+                            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.fullName}</p>
                           )}
-                          <p className="text-xs text-green-300 font-medium">
-                            Saving Rs {discountAmount.toLocaleString()}
-                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <FieldLabel htmlFor="email" required>Email Address</FieldLabel>
+                            <input
+                              id="email"
+                              type="email"
+                              value={email}
+                              onChange={e => setEmail(e.target.value)}
+                              placeholder="you@example.com"
+                              className={inputCls(!!fieldErrors.email)}
+                            />
+                            {fieldErrors.email && (
+                              <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.email}</p>
+                            )}
+                          </div>
+                          <div>
+                            <FieldLabel htmlFor="phone" required>Phone Number</FieldLabel>
+                            <input
+                              id="phone"
+                              type="tel"
+                              value={phone}
+                              onChange={e => setPhone(e.target.value)}
+                              placeholder="03001234567"
+                              className={inputCls(!!fieldErrors.phone)}
+                            />
+                            {fieldErrors.phone && (
+                              <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.phone}</p>
+                            )}
+                            {!fieldErrors.phone && phone && isValidPhone(phone) && (
+                              <p className="mt-1.5 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 size={12} />Valid number</p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveCoupon}
-                        className="p-1.5 rounded-full text-green-400 hover:bg-green-500/20 transition-colors"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={couponInput}
-                        onChange={e => setCouponInput(e.target.value.toUpperCase())}
-                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApplyCoupon())}
-                        placeholder="ENTER CODE"
-                        className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium tracking-widest text-white placeholder:tracking-normal placeholder:text-slate-500 bg-surface-850 border border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all uppercase ${
-                          couponResult?.valid === false ? 'border-red-400' : ''
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleApplyCoupon}
-                        disabled={couponLoading || !couponInput.trim()}
-                        className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {couponLoading ? <Loader2 size={15} className="animate-spin" /> : <Tag size={15} />}
-                        Apply
-                      </button>
-                    </div>
-                  )}
+                    </section>
 
-                  {/* Coupon error */}
-                  {couponResult?.valid === false && (
-                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
-                      <AlertCircle size={12} />{couponResult.error || 'Invalid or expired coupon.'}
-                    </p>
-                  )}
-                </section>
+                    {/* ── Section 2: Payment Details ───────────────────────── */}
+                    <section className="bg-surface-850 rounded-2xl border border-white/5 p-5 sm:p-6">
+                      <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] flex items-center justify-center">2</span>
+                        Payment Details
+                      </h2>
 
-                {/* ── Section 3: Payment Method ───────────────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">3</span>
-                    Payment Method
-                  </h2>
+                      {accounts.length === 0 ? (
+                        <div className="text-center py-6 text-slate-500 text-sm">
+                          No payment methods configured. Please contact support.
+                        </div>
+                      ) : (
+                        <div className="space-y-5">
+                          {/* Payment Method Selector */}
+                          <div>
+                            <FieldLabel required>Select Payment Method</FieldLabel>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {accounts.map(acc => {
+                                const isSelected = acc.id === selectedAccountId
+                                return (
+                                  <button
+                                    key={acc.id}
+                                    type="button"
+                                    onClick={() => setSelectedAccountId(acc.id)}
+                                    className={`text-left p-3.5 rounded-xl border-2 transition-all ${
+                                      isSelected
+                                        ? 'border-indigo-500 bg-indigo-500/10'
+                                        : 'border-white/5 hover:border-white/10 bg-surface-900/50'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                        isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-slate-600'
+                                      }`}>
+                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-surface-900" />}
+                                      </div>
+                                      <div>
+                                        <p className={`text-sm font-semibold leading-none mb-1 ${isSelected ? 'text-indigo-300' : 'text-slate-300'}`}>
+                                          {acc.method}
+                                        </p>
+                                        <p className="text-[11px] text-slate-500 truncate max-w-[150px]">
+                                          {acc.account_title}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                            {fieldErrors.account && (
+                              <p className="mt-2 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.account}</p>
+                            )}
+                          </div>
 
-                  {accounts.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500 text-sm">
-                      No payment methods configured. Please contact support.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                        {accounts.map(acc => {
-                          const isSelected = acc.id === selectedAccountId
-                          return (
-                            <button
-                              key={acc.id}
-                              type="button"
-                              onClick={() => setSelectedAccountId(acc.id)}
-                              className={`text-left p-4 rounded-xl border-2 transition-all ${
-                                isSelected
-                                  ? 'border-indigo-500 bg-indigo-500/10'
-                                  : 'border-white/10 hover:border-white/20 bg-transparent'
+                          {/* Selected Account Transfer Details */}
+                          <AnimatePresence mode="wait">
+                            {selectedAccount && (
+                              <motion.div
+                                key={selectedAccount.id}
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="pt-5 border-t border-white/5">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Shield size={14} className="text-indigo-400" />
+                                    <p className="text-xs font-bold text-slate-300 uppercase tracking-wide">Transfer Details</p>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-surface-900/50 rounded-xl p-4 border border-white/5">
+                                    {selectedAccount.bank_name && (
+                                      <div className="col-span-2 sm:col-span-1">
+                                        <p className="text-[10px] text-slate-500 mb-0.5 font-bold uppercase tracking-wider">Bank</p>
+                                        <p className="text-sm font-medium text-slate-200">{selectedAccount.bank_name}</p>
+                                      </div>
+                                    )}
+                                    <div className="col-span-2 sm:col-span-1">
+                                      <p className="text-[10px] text-slate-500 mb-0.5 font-bold uppercase tracking-wider">Account Title</p>
+                                      <p className="text-sm font-medium text-slate-200">{selectedAccount.account_title}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                      <p className="text-[10px] text-slate-500 mb-0.5 font-bold uppercase tracking-wider">Account Number</p>
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-mono text-sm text-slate-200">{selectedAccount.account_number}</p>
+                                        <CopyButton value={selectedAccount.account_number} label="" />
+                                      </div>
+                                    </div>
+                                    {selectedAccount.iban && (
+                                      <div className="col-span-full pt-2 border-t border-white/5">
+                                        <p className="text-[10px] text-slate-500 mb-0.5 font-bold uppercase tracking-wider">IBAN</p>
+                                        <div className="flex items-center gap-2">
+                                          <p className="font-mono text-sm text-slate-200 break-all">{selectedAccount.iban}</p>
+                                          <CopyButton value={selectedAccount.iban} label="" />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {selectedAccount.instructions && (
+                                    <div className="mt-3 flex gap-2.5 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                                      <Info size={14} className="text-indigo-400 flex-shrink-0 mt-0.5" />
+                                      <p className="text-[11px] text-indigo-300 leading-relaxed">
+                                        {selectedAccount.instructions}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </section>
+
+                    {/* ── Section 3: Payment Confirmation ───────────────── */}
+                    <section className="bg-surface-850 rounded-2xl border border-white/5 p-5 sm:p-6">
+                      <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] flex items-center justify-center">3</span>
+                        Payment Confirmation
+                      </h2>
+
+                      <div className="space-y-6">
+                        {/* Transaction Reference */}
+                        <div>
+                          <FieldLabel htmlFor="transactionRef" required>Transaction ID / Reference</FieldLabel>
+                          <input
+                            id="transactionRef"
+                            type="text"
+                            value={transactionRef}
+                            onChange={e => setTransactionRef(e.target.value)}
+                            placeholder="e.g. 0123456789 or TXN-XXXXXX"
+                            className={inputCls(!!fieldErrors.transactionRef)}
+                          />
+                          {fieldErrors.transactionRef && (
+                            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.transactionRef}</p>
+                          )}
+                        </div>
+
+                        {/* Payment Screenshot */}
+                        <div>
+                          <FieldLabel>Payment Screenshot <span className="text-slate-500 font-normal">(Optional but recommended)</span></FieldLabel>
+                          {proofPreview ? (
+                            <div className="relative w-full max-w-sm rounded-xl overflow-hidden border border-white/10 h-36">
+                              <img src={proofPreview} alt="Proof preview" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={handleRemoveFile}
+                                className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-md backdrop-blur-sm"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
+                              onDragLeave={() => setIsDragging(false)}
+                              onDrop={handleDrop}
+                              onClick={() => fileInputRef.current?.click()}
+                              className={`relative flex flex-col items-center justify-center gap-2 h-36 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
+                                isDragging
+                                  ? 'border-indigo-400 bg-indigo-500/10'
+                                  : 'border-white/10 hover:border-indigo-500/40 hover:bg-surface-900/50'
                               }`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                  isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-white/30'
-                                }`}>
-                                  {isSelected && <div className="w-2 h-2 rounded-full bg-surface-900" />}
-                                </div>
-                                <div>
-                                  <p className={`text-sm font-semibold ${isSelected ? 'text-indigo-300' : 'text-white'}`}>
-                                    {acc.method}
-                                  </p>
-                                  <p className="text-xs text-slate-400 truncate max-w-[160px]">
-                                    {acc.account_title}
-                                    {acc.bank_name && ` · ${acc.bank_name}`}
-                                  </p>
-                                </div>
+                              <div className="w-10 h-10 rounded-full bg-surface-900 flex items-center justify-center">
+                                <Upload size={18} className="text-slate-400" />
                               </div>
-                            </button>
-                          )
-                        })}
-                      </div>
+                              <div className="text-center">
+                                <p className="text-[13px] font-medium text-slate-300">Click to browse or drag & drop</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">JPG, PNG, WEBP · Max 8 MB</p>
+                              </div>
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                className="hidden"
+                                onChange={e => {
+                                  const f = e.target.files?.[0]
+                                  if (f) handleFileSelect(f)
+                                }}
+                              />
+                            </div>
+                          )}
 
-                      {/* Selected account details */}
-                      <AnimatePresence mode="wait">
-                        {selectedAccount && (
-                          <motion.div
-                            key={selectedAccount.id}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 8 }}
-                            transition={{ duration: 0.2 }}
-                            className="bg-white/[0.03] rounded-xl border border-white/10 p-5 space-y-4"
-                          >
-                            <div className="flex items-center gap-2 mb-1">
-                              <Shield size={15} className="text-indigo-400" />
-                              <p className="text-sm font-bold text-white">Transfer Details</p>
+                          {uploadError && uploadState !== 'error' && (
+                            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{uploadError}</p>
+                          )}
+                          {uploadState === 'idle' && proofFile && !proofPreview && (
+                            <p className="mt-1.5 text-xs text-slate-400 flex items-center gap-1.5">
+                              <Image size={12} /> {proofFile.name}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Additional Notes (Expandable) */}
+                        <div className="pt-2">
+                          <details className="group">
+                            <summary className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer list-none transition-colors">
+                              <span className="w-4 h-4 flex items-center justify-center rounded bg-indigo-500/20 group-open:bg-indigo-500/10 transition-colors">+</span>
+                              Add an optional note
+                            </summary>
+                            <div className="mt-3">
+                              <textarea
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                                placeholder="Any additional information regarding your payment…"
+                                rows={2}
+                                maxLength={500}
+                                className={inputCls() + ' resize-none'}
+                              />
+                              <p className="text-right text-[10px] text-slate-500 mt-1">{notes.length}/500</p>
+                            </div>
+                          </details>
+                        </div>
+                      </div>
+                    </section>
+
+                  </div>
+
+                  {/* ── RIGHT: Sticky Order Summary (approx 35%) ──────────────────────── */}
+                  <div className="w-full lg:w-[35%] xl:w-[32%] flex-shrink-0">
+                    <div className="lg:sticky lg:top-24 space-y-4">
+
+                      {/* Summary Card */}
+                      <div className="bg-surface-850 rounded-2xl border border-white/5 p-5 sm:p-6 shadow-xl shadow-black/20">
+                        <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wide">Order Summary</h3>
+
+                        {resolvedPlan && (
+                          <>
+                            {/* Plan info */}
+                            <div className="bg-surface-900/50 rounded-xl p-4 border border-white/5 mb-5">
+                              <div className="flex items-start justify-between gap-3 mb-2">
+                                <div>
+                                  <p className="text-sm font-bold text-white">{resolvedPlan.display_name}</p>
+                                  <p className="text-xs text-slate-400 mt-0.5">{resolvedPlan.credits_note}</p>
+                                </div>
+                                <p className="text-sm font-bold text-white whitespace-nowrap">{resolvedPlan.price_label}<span className="text-[10px] text-slate-400 font-normal">/mo</span></p>
+                              </div>
+
+                              <ul className="space-y-1.5 mt-3">
+                                {resolvedPlan.features.slice(0, 3).map((f, i) => (
+                                  <li key={i} className="flex items-center gap-2 text-[11px] text-slate-400">
+                                    <Check size={10} className="text-indigo-400 flex-shrink-0" strokeWidth={3} />
+                                    {f}
+                                  </li>
+                                ))}
+                                {resolvedPlan.features.length > 3 && (
+                                  <li className="text-[10px] text-slate-500 pl-4">
+                                    +{resolvedPlan.features.length - 3} more features
+                                  </li>
+                                )}
+                              </ul>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                              {selectedAccount.bank_name && (
-                                <div>
-                                  <p className="text-xs text-slate-400 mb-1 font-medium">Bank</p>
-                                  <p className="font-semibold text-white">{selectedAccount.bank_name}</p>
-                                </div>
-                              )}
-                              <div>
-                                <p className="text-xs text-slate-400 mb-1 font-medium">Account Title</p>
-                                <p className="font-semibold text-white">{selectedAccount.account_title}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-400 mb-1 font-medium">Account Number</p>
-                                <div className="flex items-center gap-2">
-                                  <code className="font-mono text-sm text-white bg-surface-800 px-2 py-1 rounded border border-white/10">
-                                    {selectedAccount.account_number}
-                                  </code>
-                                  <CopyButton value={selectedAccount.account_number} />
-                                </div>
-                              </div>
-                              {selectedAccount.iban && (
-                                <div className="col-span-full">
-                                  <p className="text-xs text-slate-400 mb-1 font-medium">IBAN</p>
-                                  <div className="flex items-center gap-2">
-                                    <code className="font-mono text-sm text-white bg-surface-800 px-2 py-1 rounded border border-white/10 break-all">
-                                      {selectedAccount.iban}
-                                    </code>
-                                    <CopyButton value={selectedAccount.iban} />
+                            {/* Coupon Inline Section */}
+                            <div className="mb-5">
+                              {appliedCoupon && couponResult?.valid ? (
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                                  <div className="flex items-center gap-2.5">
+                                    <Tag size={14} className="text-green-400" />
+                                    <div>
+                                      <p className="text-xs font-bold text-green-400">{appliedCoupon}</p>
+                                      {couponResult.description && (
+                                        <p className="text-[10px] text-green-500">{couponResult.description}</p>
+                                      )}
+                                    </div>
                                   </div>
+                                  <button
+                                    type="button"
+                                    onClick={handleRemoveCoupon}
+                                    className="p-1 rounded-full text-green-400 hover:bg-green-500/20 transition-colors"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      value={couponInput}
+                                      onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApplyCoupon())}
+                                      placeholder="Discount Code"
+                                      className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-medium tracking-wide text-white placeholder:text-slate-500 bg-surface-900 border border-white/5 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/20 transition-all uppercase ${
+                                        couponResult?.valid === false ? 'border-red-400/50' : ''
+                                      }`}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleApplyCoupon}
+                                      disabled={couponLoading || !couponInput.trim()}
+                                      className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/5"
+                                    >
+                                      {couponLoading ? <Loader2 size={13} className="animate-spin mx-auto" /> : 'Apply'}
+                                    </button>
+                                  </div>
+                                  {couponResult?.valid === false && (
+                                    <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
+                                      <AlertCircle size={10} />{couponResult.error || 'Invalid or expired coupon.'}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </div>
 
-                            {/* Amount to transfer */}
-                            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                              <p className="text-sm text-slate-300">
-                                Transfer exactly:
-                              </p>
-                              <p className="text-xl font-black text-white">
-                                Rs {finalAmount.toLocaleString()}
-                              </p>
-                            </div>
-
-                            {selectedAccount.instructions && (
-                              <div className="flex gap-3 p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                                <Info size={16} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-indigo-300 leading-relaxed">
-                                  {selectedAccount.instructions}
-                                </p>
+                            {/* Price breakdown */}
+                            <div className="space-y-3 pt-4 border-t border-white/5 mb-5">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">Subtotal</span>
+                                <span className="text-white font-medium">Rs {baseAmount.toLocaleString()}</span>
                               </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </>
-                  )}
 
-                  {fieldErrors.account && (
-                    <p className="mt-3 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.account}</p>
-                  )}
-                </section>
+                              {discountAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-green-400 flex items-center gap-1">
+                                    <Tag size={12} /> Coupon ({appliedCoupon})
+                                  </span>
+                                  <span className="text-green-400 font-medium">−Rs {discountAmount.toLocaleString()}</span>
+                                </div>
+                              )}
 
-                {/* ── Section 4: Transaction Reference ───────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">4</span>
-                    Transaction Reference
-                  </h2>
-
-                  <div>
-                    <FieldLabel htmlFor="transactionRef" required>Transaction ID / Reference Number</FieldLabel>
-                    <input
-                      id="transactionRef"
-                      type="text"
-                      value={transactionRef}
-                      onChange={e => setTransactionRef(e.target.value)}
-                      placeholder="e.g. 0123456789 or TXN-XXXXXX"
-                      className={inputCls(!!fieldErrors.transactionRef)}
-                    />
-                    {fieldErrors.transactionRef ? (
-                      <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{fieldErrors.transactionRef}</p>
-                    ) : (
-                      <p className="mt-1.5 text-xs text-slate-400">
-                        This is the transaction/reference ID from your banking or payment app after you transfer the funds.
-                      </p>
-                    )}
-                  </div>
-                </section>
-
-                {/* ── Section 5: Payment Proof ────────────────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-1 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">5</span>
-                    Payment Screenshot
-                    <span className="text-slate-500 text-xs font-normal ml-1">(Optional but recommended)</span>
-                  </h2>
-                  <p className="text-xs text-slate-400 mb-5 ml-8">
-                    Upload a screenshot or photo of your payment confirmation. Accepted: JPG, PNG, WEBP · Max 8 MB.
-                  </p>
-
-                  {proofPreview ? (
-                    <div className="space-y-3">
-                      <div className="relative w-full max-w-sm rounded-xl overflow-hidden border border-white/10">
-                        <img src={proofPreview} alt="Payment proof preview" className="w-full object-cover max-h-64" />
-                        <button
-                          type="button"
-                          onClick={handleRemoveFile}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-md"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-
-                      {/* Upload state */}
-                      {uploadState === 'uploading' && (
-                        <p className="text-xs text-indigo-400 flex items-center gap-1.5">
-                          <Loader2 size={12} className="animate-spin" /> Uploading…
-                        </p>
-                      )}
-                      {uploadState === 'done' && (
-                        <p className="text-xs text-green-400 flex items-center gap-1.5">
-                          <CheckCircle2 size={12} /> Uploaded successfully.
-                        </p>
-                      )}
-                      {uploadState === 'error' && (
-                        <p className="text-xs text-red-500 flex items-center gap-1.5">
-                          <AlertCircle size={12} /> {uploadError}
-                        </p>
-                      )}
-                      {uploadState === 'idle' && proofFile && (
-                        <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                          <Image size={12} /> {proofFile.name} · {(proofFile.size / 1024 / 1024).toFixed(2)} MB — will upload on submit.
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div
-                      onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
-                      onDragLeave={() => setIsDragging(false)}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`relative flex flex-col items-center justify-center gap-3 py-10 px-6 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
-                        isDragging
-                          ? 'border-indigo-400 bg-indigo-500/10'
-                          : 'border-white/15 hover:border-indigo-500/50 hover:bg-surface-850'
-                      }`}
-                    >
-                      <div className="w-12 h-12 rounded-full bg-surface-850 flex items-center justify-center">
-                        <Upload size={22} className="text-slate-500" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-semibold text-slate-300">
-                          Click to browse or drag & drop
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">JPG, PNG, WEBP · Max 8 MB</p>
-                      </div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
-                        className="hidden"
-                        onChange={e => {
-                          const f = e.target.files?.[0]
-                          if (f) handleFileSelect(f)
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {uploadError && uploadState !== 'error' && (
-                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{uploadError}</p>
-                  )}
-                </section>
-
-                {/* ── Section 6: Notes ────────────────────────────────── */}
-                <section className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                  <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center justify-center">6</span>
-                    Additional Notes
-                    <span className="text-slate-500 text-xs font-normal ml-1">(Optional)</span>
-                  </h2>
-                  <textarea
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Any additional information regarding your payment…"
-                    rows={3}
-                    maxLength={500}
-                    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-slate-500 bg-surface-850 border border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
-                  />
-                  <p className="text-right text-xs text-slate-500 mt-1">{notes.length}/500</p>
-                </section>
-
-                {/* ── Submit button (mobile visible) ──────────────────── */}
-                <div className="lg:hidden">
-                  <button
-                    type="submit"
-                    disabled={submitting || accounts.length === 0}
-                    className="btn-primary w-full py-4 text-base font-semibold rounded-2xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? (
-                      <><Loader2 size={20} className="animate-spin" /> Submitting…</>
-                    ) : (
-                      <><Shield size={18} /> Submit Payment for Review</>
-                    )}
-                  </button>
-                  <p className="text-center text-xs text-slate-400 mt-3">
-                    By submitting you confirm that you have transferred the funds.
-                  </p>
-                </div>
-
-              </div>
-
-              {/* ── RIGHT: Sticky Order Summary ──────────────────────── */}
-              <div className="w-full lg:w-80 xl:w-96 flex-shrink-0">
-                <div className="lg:sticky lg:top-24 space-y-4">
-
-                  {/* Plan summary card */}
-                  <div className="bg-surface-850 rounded-2xl border border-white/10 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-bold text-white">Order Summary</h3>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/upgrade?plan=${resolvedPlan?.id || ''}`)}
-                        className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
-                      >
-                        Change Plan
-                      </button>
-                    </div>
-
-                    {resolvedPlan && (
-                      <>
-                        {/* Plan info */}
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div>
-                            <p className="font-bold text-white">{resolvedPlan.display_name}</p>
-                            <p className="text-xs text-slate-400 mt-0.5">{resolvedPlan.credits_note}</p>
-                          </div>
-                          <p className="text-sm font-bold text-white whitespace-nowrap">{resolvedPlan.price_label}/mo</p>
-                        </div>
-
-                        {/* Key features (top 5) */}
-                        <ul className="space-y-2 mb-5">
-                          {resolvedPlan.features.slice(0, 5).map((f, i) => (
-                            <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
-                              <Check size={11} className="text-green-500 flex-shrink-0" strokeWidth={3} />
-                              {f}
-                            </li>
-                          ))}
-                          {resolvedPlan.features.length > 5 && (
-                            <li className="text-xs text-slate-500 pl-5">
-                              +{resolvedPlan.features.length - 5} more features
-                            </li>
-                          )}
-                        </ul>
-
-                        {/* Price breakdown */}
-                        <div className="space-y-2.5 pt-4 border-t border-white/5">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Subtotal</span>
-                            <span className="text-white font-medium">Rs {baseAmount.toLocaleString()}</span>
-                          </div>
-
-                          {discountAmount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-green-400 flex items-center gap-1">
-                                <Tag size={12} /> Coupon ({appliedCoupon})
-                              </span>
-                              <span className="text-green-400 font-medium">−Rs {discountAmount.toLocaleString()}</span>
+                              <div className="flex justify-between pt-3 border-t border-white/5">
+                                <span className="font-bold text-white text-base">Total to Pay</span>
+                                <span className="font-black text-xl text-indigo-400">Rs {finalAmount.toLocaleString()}</span>
+                              </div>
                             </div>
-                          )}
+                          </>
+                        )}
 
-                          <div className="flex justify-between pt-2.5 border-t border-white/5">
-                            <span className="font-bold text-white">Total to Pay</span>
-                            <span className="font-black text-xl text-white">Rs {finalAmount.toLocaleString()}</span>
+                        {/* Trust & Submit */}
+                        <div className="space-y-4">
+                          <div className="flex gap-2.5 bg-surface-900/50 rounded-xl p-3 border border-white/5">
+                            <Shield size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-[11px] font-semibold text-slate-300 mb-0.5">Manual Review</p>
+                              <p className="text-[10px] text-slate-500 leading-relaxed">
+                                Payments are manually verified. Plans are usually activated within a few business hours.
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
 
-                  {/* Trust badge */}
-                  <div className="bg-surface-850 rounded-2xl border border-white/5 p-4">
-                    <div className="flex gap-3">
-                      <Shield size={18} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-semibold text-slate-300 mb-1">Manual Review Process</p>
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          After you submit your payment request, our team manually verifies your transaction. Plans are typically activated within a few hours during business hours.
-                        </p>
+                          <button
+                            type="submit"
+                            disabled={submitting || accounts.length === 0}
+                            className="btn-primary w-full py-3.5 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
+                          >
+                            {submitting ? (
+                              <><Loader2 size={16} className="animate-spin" /> Submitting…</>
+                            ) : (
+                              <><Zap size={14} className="fill-current" /> Submit Payment</>
+                            )}
+                          </button>
+                        </div>
+
                       </div>
                     </div>
                   </div>
 
-                  {/* Desktop submit */}
-                  <div className="hidden lg:block">
-                    <button
-                      type="submit"
-                      disabled={submitting || accounts.length === 0}
-                      className="btn-primary w-full py-4 text-base font-semibold rounded-2xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
-                    >
-                      {submitting ? (
-                        <><Loader2 size={20} className="animate-spin" /> Submitting…</>
-                      ) : (
-                        <><Shield size={18} /> Submit Payment for Review</>
-                      )}
-                    </button>
-                    <p className="text-center text-xs text-slate-400 mt-3">
-                      By submitting you confirm that you have transferred the funds.
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </div>
-            </form>
+              </form>
             </>
           )}
 
