@@ -19,6 +19,12 @@ export interface AuthUser {
   name: string | null
 }
 
+export interface SignupMetadata {
+  full_name: string
+  phone_number: string
+  marketing_opt_in: boolean
+}
+
 interface AuthContextValue {
   user: AuthUser | null
   session: Session | null
@@ -28,7 +34,7 @@ interface AuthContextValue {
   error: string | null
   clearError: () => void
   signInWithPassword: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<{ confirmEmail: boolean }>
+  signUp: (email: string, password: string, metadata?: SignupMetadata) => Promise<{ confirmEmail: boolean }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
 }
@@ -95,17 +101,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     if (!supabase) throw new Error('Auth is not configured.')
     setError(null)
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+    const normalizedEmail = email.trim().toLowerCase()
+    const { error: err } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
     if (err) {
       setError(err.message)
       throw err
     }
   }, [])
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, metadata?: SignupMetadata) => {
     if (!supabase) throw new Error('Auth is not configured.')
     setError(null)
-    const { data, error: err } = await supabase.auth.signUp({ email, password })
+    const normalizedEmail = email.trim().toLowerCase()
+    const { data, error: err } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: metadata
+      }
+    })
     if (err) {
       setError(err.message)
       throw err
@@ -124,7 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = useCallback(async (email: string) => {
     if (!supabase) throw new Error('Auth is not configured.')
     setError(null)
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+    const normalizedEmail = email.trim().toLowerCase()
+    const { error: err } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
       redirectTo: `${window.location.origin}/login`,
     })
     if (err) { setError(err.message); throw err }

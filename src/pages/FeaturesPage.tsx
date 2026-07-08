@@ -101,7 +101,7 @@ export default function FeaturesPage() {
       <Section
         title="Platform details"
         subtitle="Built for professional creators who need reliability and speed."
-        className="bg-black/20"
+        className="bg-surface-925"
       >
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -112,7 +112,7 @@ export default function FeaturesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group p-5 md:p-6 rounded-3xl bg-[#0a0a0f] border border-white/5 text-center flex flex-col h-full hover:border-indigo-500/30 hover:-translate-y-2 transition-all duration-300 shadow-xl relative overflow-hidden"
+                className="group p-5 md:p-6 rounded-3xl bg-surface-900 border border-white/5 text-center flex flex-col h-full hover:bg-surface-850 hover:border-indigo-500/30 hover:-translate-y-2 transition-all duration-300 shadow-xl relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all duration-300">

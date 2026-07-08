@@ -27,7 +27,7 @@ const legalLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative bg-[#05050a] pt-20 pb-10 overflow-hidden">
+    <footer className="relative bg-surface-950 pt-16 pb-8 overflow-hidden">
       {/* Top glowing separator */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-24 bg-indigo-500/10 blur-[80px] pointer-events-none" />
@@ -53,21 +53,21 @@ export default function Footer() {
               <a
                 href="#"
                 aria-label="Twitter"
-                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
+                className="w-10 h-10 rounded-xl bg-surface-850 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <X size={16} />
               </a>
               <a
                 href="#"
                 aria-label="GitHub"
-                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
+                className="w-10 h-10 rounded-xl bg-surface-850 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Code size={16} />
               </a>
               <a
                 href="mailto:hello@syncframestudio.com"
                 aria-label="Email"
-                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
+                className="w-10 h-10 rounded-xl bg-surface-850 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Mail size={16} />
               </a>
@@ -117,7 +117,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">
             © {new Date().getFullYear()} SyncFrame Studio. All rights reserved.
           </p>

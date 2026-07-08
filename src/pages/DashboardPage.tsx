@@ -48,7 +48,7 @@ function CreditBar({ used, total }: { used: number; total: number }) {
         <span>{remaining.toLocaleString()} remaining</span>
         <span>{total.toLocaleString()} total</span>
       </div>
-      <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
+      <div className="w-full bg-surface-850 rounded-full h-2.5 overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -196,7 +196,7 @@ export default function DashboardPage() {
                     <span className="text-slate-400 text-sm font-medium">Current Plan</span>
                   </div>
                   {dataLoading ? (
-                    <div className="h-8 w-28 bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-8 w-28 bg-surface-850 rounded-lg animate-pulse" />
                   ) : (
                     <h2 className="text-2xl font-black text-white">{plan.display_name}</h2>
                   )}
@@ -238,8 +238,8 @@ export default function DashboardPage() {
 
               {dataLoading ? (
                 <div className="space-y-4">
-                  <div className="h-10 w-32 bg-white/5 rounded-lg animate-pulse" />
-                  <div className="h-2.5 w-full bg-white/5 rounded-full animate-pulse" />
+                  <div className="h-10 w-32 bg-surface-850 rounded-lg animate-pulse" />
+                  <div className="h-2.5 w-full bg-surface-850 rounded-full animate-pulse" />
                 </div>
               ) : (
                 <>

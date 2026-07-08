@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Eye, EyeOff, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Zap } from 'lucide-react'
+import { Mail, Eye, EyeOff, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Zap, Phone } from 'lucide-react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Container from '../components/layout/Container'
@@ -15,6 +15,10 @@ export default function LoginPage() {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [marketingConsent, setMarketingConsent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -42,8 +46,40 @@ export default function LoginPage() {
     setSuccessMsg(null)
 
     if (!email.trim()) { setFormError('Email is required.'); return }
-    if (mode !== 'reset' && !password) { setFormError('Password is required.'); return }
-    if (mode === 'signup' && password.length < 8) { setFormError('Password must be at least 8 characters.'); return }
+
+    if (mode === 'signup') {
+      const name = fullName.trim()
+      if (!name || name.length < 2 || name.length > 100) { setFormError('Full Name must be between 2 and 100 characters.'); return }
+
+      const trimmedPhone = phoneNumber.trim()
+
+      if (/[^0-9+\s\-()]/g.test(trimmedPhone)) {
+        setFormError('Phone number contains invalid characters.')
+        return
+      }
+      if ((trimmedPhone.match(/\+/g) || []).length > 1) {
+        setFormError('Phone number can only contain one + sign.')
+        return
+      }
+      if (trimmedPhone.includes('+') && !trimmedPhone.startsWith('+')) {
+        setFormError('The + sign must be at the beginning of the phone number.')
+        return
+      }
+
+      const hasPlus = trimmedPhone.startsWith('+')
+      const digitsOnly = trimmedPhone.replace(/\D/g, '')
+      if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+        setFormError('Please enter a valid phone number (7-15 digits).')
+        return
+      }
+      const normalizedPhone = hasPlus ? `+${digitsOnly}` : digitsOnly
+
+      if (!password) { setFormError('Password is required.'); return }
+      if (password.length < 8) { setFormError('Password must be at least 8 characters.'); return }
+      if (password !== confirmPassword) { setFormError('Passwords do not match.'); return }
+    } else if (mode !== 'reset') {
+      if (!password) { setFormError('Password is required.'); return }
+    }
 
     setSubmitting(true)
     try {
@@ -51,7 +87,17 @@ export default function LoginPage() {
         await signInWithPassword(email, password)
         navigate(from, { replace: true })
       } else if (mode === 'signup') {
-        const { confirmEmail } = await signUp(email, password)
+        const trimmedPhone = phoneNumber.trim()
+        const hasPlus = trimmedPhone.startsWith('+')
+        const digitsOnly = trimmedPhone.replace(/\D/g, '')
+        const normalizedPhone = hasPlus ? `+${digitsOnly}` : digitsOnly
+
+        const metadata = {
+          full_name: fullName.trim(),
+          phone_number: normalizedPhone,
+          marketing_opt_in: marketingConsent
+        }
+        const { confirmEmail } = await signUp(email, password, metadata)
         if (confirmEmail) {
           setSuccessMsg('Account created! Check your email to confirm your address, then log in.')
           setMode('login')
@@ -135,6 +181,27 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Full Name */}
+              {mode === 'signup' && (
+                <div>
+                  <label htmlFor="login-fullname" className="block text-slate-400 text-sm font-medium mb-2">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      id="login-fullname"
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/30 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Email */}
               <div>
                 <label htmlFor="login-email" className="block text-slate-400 text-sm font-medium mb-2">
@@ -154,6 +221,27 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+
+              {/* Phone Number */}
+              {mode === 'signup' && (
+                <div>
+                  <label htmlFor="login-phone" className="block text-slate-400 text-sm font-medium mb-2">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      id="login-phone"
+                      type="tel"
+                      required
+                      value={phoneNumber}
+                      onChange={e => setPhoneNumber(e.target.value)}
+                      placeholder="+92 300 1234567"
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/30 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Password */}
               {mode !== 'reset' && (
@@ -195,6 +283,48 @@ export default function LoginPage() {
                   {mode === 'signup' && (
                     <p className="text-slate-500 text-xs mt-2">Must be at least 8 characters.</p>
                   )}
+                </div>
+              )}
+
+              {/* Confirm Password */}
+              {mode === 'signup' && (
+                <div>
+                  <label htmlFor="login-confirm-password" className="block text-slate-400 text-sm font-medium mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      id="login-confirm-password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter your password"
+                      autoComplete="new-password"
+                      className="w-full pl-11 pr-12 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-black/30 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Marketing Consent */}
+              {mode === 'signup' && (
+                <div className="flex items-start gap-3 mt-2 pt-2">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input
+                      id="marketing-consent"
+                      type="checkbox"
+                      checked={marketingConsent}
+                      onChange={e => setMarketingConsent(e.target.checked)}
+                      className="w-4 h-4 rounded border border-white/20 bg-black/20 text-indigo-500 focus:ring-indigo-500/50 focus:ring-offset-0 transition-all cursor-pointer"
+                    />
+                  </div>
+                  <div className="text-sm">
+                    <label htmlFor="marketing-consent" className="text-slate-400 cursor-pointer select-none leading-relaxed inline-block">
+                      I agree to receive product updates, feature announcements, special offers, and marketing emails from SyncFrame Studio.
+                    </label>
+                  </div>
                 </div>
               )}
 

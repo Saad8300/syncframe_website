@@ -44,7 +44,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05 }}
-      className="rounded-2xl glass border border-white/5 overflow-hidden"
+      className="rounded-2xl bg-surface-900 border border-white/5 overflow-hidden"
     >
       <button
         onClick={() => setOpen(!open)}
@@ -126,8 +126,8 @@ export default function PricingPage() {
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 className={`group relative flex flex-col rounded-3xl p-7 transition-all duration-500 hover:-translate-y-2 overflow-hidden ${
                   plan.highlighted
-                    ? 'bg-[#0a0a0f] border border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.15)] hover:shadow-[0_0_50px_rgba(99,102,241,0.25)]'
-                    : 'bg-[#05050a] border border-white/5 hover:border-white/10 shadow-xl hover:shadow-2xl'
+                    ? 'bg-surface-850 border border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.15)] hover:shadow-[0_0_50px_rgba(99,102,241,0.25)]'
+                    : 'bg-surface-900 border border-white/5 hover:border-white/10 shadow-xl hover:shadow-2xl'
                 }`}
               >
                 {/* Background glow */}
@@ -162,7 +162,7 @@ export default function PricingPage() {
                   {plan.features.map((f, fi) => (
                     <li key={fi} className="flex items-start gap-3 text-sm">
                       <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
-                        plan.highlighted ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20' : 'bg-white/5 text-slate-400 border border-white/5'
+                        plan.highlighted ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20' : 'bg-surface-850 text-slate-400 border border-white/5'
                       }`}>
                         <Check size={11} strokeWidth={3} />
                       </div>
@@ -172,7 +172,7 @@ export default function PricingPage() {
                 </ul>
 
                 {plan.id === 'free' ? (
-                  <Link to="/download" className="w-full text-center py-4 px-6 rounded-xl font-bold text-sm transition-all duration-300 bg-white/5 border border-white/10 text-white hover:border-indigo-500/30 hover:bg-white/10">
+                  <Link to="/download" className="w-full text-center py-4 px-6 rounded-xl font-bold text-sm transition-all duration-300 bg-surface-850 border border-white/10 text-white hover:border-indigo-500/30 hover:bg-surface-800">
                     Download Free
                   </Link>
                 ) : (
@@ -181,7 +181,7 @@ export default function PricingPage() {
                     className={`w-full text-center py-4 px-6 rounded-xl font-bold text-sm transition-all duration-300 ${
                       plan.highlighted
                         ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:scale-[1.02]'
-                        : 'bg-white/5 border border-white/10 text-white hover:border-indigo-500/30 hover:bg-white/10'
+                        : 'bg-surface-850 border border-white/10 text-white hover:border-indigo-500/30 hover:bg-surface-800'
                     }`}
                   >
                     Get {plan.display_name}
@@ -207,8 +207,7 @@ export default function PricingPage() {
         </Container>
       </Section>
 
-      {/* Feature Comparison Table */}
-      <Section title="Plan comparison" className="bg-black/20">
+      <Section title="Plan comparison" className="bg-surface-925">
         <Container className="max-w-5xl">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
@@ -251,8 +250,7 @@ export default function PricingPage() {
         </Container>
       </Section>
 
-      {/* FAQ */}
-      <Section title="Frequently asked questions">
+      <Section title="Frequently asked questions" className="!pb-12 md:!pb-16">
         <Container className="max-w-3xl">
           <div className="space-y-3">
             {faqItems.map((item, i) => (

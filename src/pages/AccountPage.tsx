@@ -62,16 +62,16 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={() => alert('Google OAuth integration coming soon.')}
-                  className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl glass border border-white/10 text-white text-sm font-medium hover:border-indigo-500/30 hover:bg-white/5 transition-all mb-6"
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl glass border border-white/10 text-white text-sm font-medium hover:border-indigo-500/30 hover:bg-surface-850 transition-all mb-6"
                 >
                   <Globe size={18} className="text-blue-400" />
                   Continue with Google
                 </button>
 
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="flex-1 h-px bg-white/5" />
+                  <div className="flex-1 h-px bg-surface-850" />
                   <span className="text-slate-500 text-xs font-medium">OR CONTINUE WITH EMAIL</span>
-                  <div className="flex-1 h-px bg-white/5" />
+                  <div className="flex-1 h-px bg-surface-850" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -166,7 +166,7 @@ export default function AccountPage() {
                   </div>
                   <div className="w-full flex flex-col">
                     <div className="h-4 w-32 bg-white/8 rounded animate-pulse mb-2" />
-                    <div className="h-3 w-24 bg-white/5 rounded animate-pulse" />
+                    <div className="h-3 w-24 bg-surface-850 rounded animate-pulse" />
                   </div>
                 </div>
                 <p className="text-slate-500 text-xs">Log in to see your account details</p>
@@ -178,7 +178,7 @@ export default function AccountPage() {
                   <Zap size={16} className="text-indigo-400" />
                   <span className="text-white font-semibold text-sm">Current Plan</span>
                 </div>
-                <div className="h-8 w-24 bg-white/5 rounded-lg animate-pulse mb-3" />
+                <div className="h-8 w-24 bg-surface-850 rounded-lg animate-pulse mb-3" />
                 <p className="text-slate-500 text-xs">Plan information loads after login</p>
               </div>
 
@@ -188,8 +188,8 @@ export default function AccountPage() {
                   <Coins size={16} className="text-amber-400" />
                   <span className="text-white font-semibold text-sm">Credits Remaining</span>
                 </div>
-                <div className="h-8 w-20 bg-white/5 rounded-lg animate-pulse mb-3" />
-                <div className="w-full bg-white/5 rounded-full h-2.5 mb-3 overflow-hidden">
+                <div className="h-8 w-20 bg-surface-850 rounded-lg animate-pulse mb-3" />
+                <div className="w-full bg-surface-850 rounded-full h-2.5 mb-3 overflow-hidden">
                   <div className="bg-indigo-500/40 h-full rounded-full w-1/3" />
                 </div>
                 <p className="text-slate-500 text-xs">Credit balance loads after login</p>

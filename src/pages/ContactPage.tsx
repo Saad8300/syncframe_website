@@ -92,7 +92,7 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold text-white mb-6">Send a message</h2>
 
               {submitted ? (
-                <div className="p-8 rounded-2xl glass-strong border border-emerald-500/20 text-center flex flex-col items-center justify-center min-h-[400px]">
+                <div className="p-8 rounded-2xl bg-surface-900 border border-emerald-500/20 text-center flex flex-col items-center justify-center min-h-[400px] shadow-xl">
                   <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-5">
                     <Send size={24} />
                   </div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                   <p className="text-slate-400 text-sm">We'll get back to you within 24–48 hours.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5 p-6 md:p-8 rounded-2xl glass border border-white/5">
+                <form onSubmit={handleSubmit} className="space-y-5 p-6 md:p-8 rounded-2xl bg-surface-900 border border-white/5 shadow-xl">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="w-full flex flex-col">
                       <label htmlFor="contact-name" className="block text-slate-400 text-sm font-medium mb-2">Name</label>
@@ -136,13 +136,13 @@ export default function ContactPage() {
                       onChange={e => setForm({ ...form, subject: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500/50 focus:bg-black/40 transition-all appearance-none"
                     >
-                      <option value="" disabled className="bg-[#09090f]">Select a subject</option>
-                      <option value="support" className="bg-[#09090f]">Technical Support</option>
-                      <option value="bug" className="bg-[#09090f]">Bug Report</option>
-                      <option value="billing" className="bg-[#09090f]">Billing Question</option>
-                      <option value="business" className="bg-[#09090f]">Business Inquiry</option>
-                      <option value="feature" className="bg-[#09090f]">Feature Request</option>
-                      <option value="other" className="bg-[#09090f]">Other</option>
+                      <option value="" disabled className="bg-surface-950">Select a subject</option>
+                      <option value="support" className="bg-surface-950">Technical Support</option>
+                      <option value="bug" className="bg-surface-950">Bug Report</option>
+                      <option value="billing" className="bg-surface-950">Billing Question</option>
+                      <option value="business" className="bg-surface-950">Business Inquiry</option>
+                      <option value="feature" className="bg-surface-950">Feature Request</option>
+                      <option value="other" className="bg-surface-950">Other</option>
                     </select>
                   </div>
                   <div className="w-full flex flex-col">
@@ -172,7 +172,7 @@ export default function ContactPage() {
             <div className="w-full space-y-5 lg:pt-14">
               <h2 className="text-2xl font-bold text-white mb-6">Other ways to reach us</h2>
 
-              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+              <div className="p-6 rounded-2xl bg-surface-900 border border-white/5 shadow-xl flex items-start gap-5 hover:border-white/10 transition-colors">
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
                   <Mail size={20} />
                 </div>
@@ -183,7 +183,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+              <div className="p-6 rounded-2xl bg-surface-900 border border-white/5 shadow-xl flex items-start gap-5 hover:border-white/10 transition-colors">
                 <div className="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center flex-shrink-0">
                   <MessageSquare size={20} />
                 </div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl glass border border-white/5 flex items-start gap-5">
+              <div className="p-6 rounded-2xl bg-surface-900 border border-white/5 shadow-xl flex items-start gap-5 hover:border-white/10 transition-colors">
                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
                   <Building2 size={20} />
                 </div>
@@ -209,9 +209,9 @@ export default function ContactPage() {
       </Section>
 
       {/* FAQ */}
-      <Section title="Frequently asked questions" className="bg-black/20">
+      <Section title="Frequently asked questions" className="bg-surface-925">
         <Container className="max-w-3xl">
-          <div className="glass rounded-2xl border border-white/5 px-6 md:px-8 py-2">
+          <div className="bg-surface-900 shadow-xl rounded-2xl border border-white/5 px-6 md:px-8 py-2">
             {faqs.map((item, i) => (
               <FAQItem key={i} q={item.q} a={item.a} />
             ))}

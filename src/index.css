@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -18,9 +19,11 @@
 
   --color-surface-50: #f8fafc;
   --color-surface-100: #f1f5f9;
-  --color-surface-800: #0f0f1a;
-  --color-surface-900: #09090f;
-  --color-surface-950: #05050a;
+  --color-surface-800: #1a1e2a;
+  --color-surface-850: #161a25;
+  --color-surface-900: #11141d;
+  --color-surface-925: #0e1119;
+  --color-surface-950: #0b0d14;
 
   --font-sans: "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
@@ -31,17 +34,28 @@
   html, body, #root {
     width: 100%;
     min-height: 100vh;
-    background-color: #09090f;
-    color: #f8fafc;
     overflow-x: hidden;
   }
-}
 
+  body {
+    background-color: var(--color-surface-950);
+    color: #e2e8f0;
+    color-scheme: dark;
+  }
+}
 
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Scrollbar */
@@ -49,7 +63,7 @@ html {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090f;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #312e81;
@@ -61,8 +75,8 @@ html {
 
 /* Selection */
 ::selection {
-  background-color: rgba(99, 102, 241, 0.3);
-  color: #f8fafc;
+  background-color: rgba(99, 102, 241, 0.2);
+  color: inherit;
 }
 
 /* Gradient text utility */

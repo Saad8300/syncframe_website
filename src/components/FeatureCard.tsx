@@ -63,7 +63,7 @@ export default function FeatureCard({ icon, title, description, badge, index = 0
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className={`group relative p-5 md:p-6 rounded-3xl bg-[#0a0a0f] border border-white/5 transition-all duration-300 cursor-default hover:-translate-y-2 hover:border-white/10 ${colors.outerGlow} overflow-hidden`}
+      className={`group relative p-5 md:p-6 rounded-3xl bg-surface-900 border border-white/5 transition-all duration-300 cursor-default hover:-translate-y-2 hover:border-white/10 hover:bg-surface-850 ${colors.outerGlow} overflow-hidden`}
     >
       {/* Top border highlight */}
       <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r ${colors.borderLight} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />

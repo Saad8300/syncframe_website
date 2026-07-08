@@ -71,7 +71,14 @@ begin
     case when v_opt_in then 'signup' else null end,
     coalesce(new.created_at, now()),
     now()
-  );
+  ) on conflict (id) do update set
+    email = excluded.email,
+    full_name = excluded.full_name,
+    phone_number = excluded.phone_number,
+    marketing_opt_in = excluded.marketing_opt_in,
+    marketing_opt_in_at = excluded.marketing_opt_in_at,
+    marketing_opt_in_source = excluded.marketing_opt_in_source,
+    updated_at = excluded.updated_at;
 
   return new;
 end;

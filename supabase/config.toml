@@ -1,0 +1,4 @@
+project_id = "syncframe"
+
+[functions.get-release-download]
+verify_jwt = false

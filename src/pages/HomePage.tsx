@@ -54,11 +54,11 @@ function AnimatedVisual() {
         initial={{ opacity: 0, rotateX: 10, y: 40 }}
         animate={{ opacity: 1, rotateX: 0, y: 0 }}
         transition={{ duration: 1, delay: 0.2, type: "spring", damping: 20 }}
-        className="w-full relative z-10 glass-strong border border-white/10 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/80 overflow-hidden flex flex-col backdrop-blur-3xl bg-[#0a0a0f]/80"
+        className="w-full relative z-10 glass-strong border border-white/10 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col backdrop-blur-3xl bg-surface-900/80"
         style={{ transformStyle: 'preserve-3d' }}
       >
         {/* Window Header */}
-        <div className="h-12 border-b border-white/5 flex items-center px-4 md:px-6 bg-white/[0.02]">
+        <div className="h-12 border-b border-white/5 flex items-center px-4 md:px-6 bg-surface-850">
           <div className="flex gap-2">
             <div className="w-3 h-3 rounded-full bg-slate-600" />
             <div className="w-3 h-3 rounded-full bg-slate-600" />
@@ -72,10 +72,10 @@ function AnimatedVisual() {
 
         <div className="flex flex-col md:flex-row h-auto md:h-[450px]">
           {/* Sidebar */}
-          <div className="hidden md:flex w-48 border-r border-white/5 flex-col p-4 gap-2 bg-white/[0.01]">
+          <div className="hidden md:flex w-48 border-r border-white/5 flex-col p-4 gap-2 bg-surface-850">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Assets</div>
             {[Image, Film, Merge].map((Icon, i) => (
-              <div key={i} className="h-10 rounded-lg flex items-center justify-start px-3 gap-3 hover:bg-white/5 cursor-pointer transition-colors text-slate-400">
+              <div key={i} className="h-10 rounded-lg flex items-center justify-start px-3 gap-3 hover:bg-surface-850 cursor-pointer transition-colors text-slate-400">
                 <Icon size={16} />
                 <div className="h-2 w-20 bg-slate-700/50 rounded-full" />
               </div>
@@ -114,7 +114,7 @@ function AnimatedVisual() {
                 
                 {/* Play button overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                  <div className="w-12 h-12 rounded-full bg-surface-800 backdrop-blur-md flex items-center justify-center border border-white/20">
                     <Play size={20} fill="white" className="text-white ml-1" />
                   </div>
                 </div>
@@ -122,7 +122,7 @@ function AnimatedVisual() {
             </div>
 
             {/* Timeline Area */}
-            <div className="h-36 md:h-48 border-t border-white/5 bg-[#05050a]/50 p-4 relative">
+            <div className="h-36 md:h-48 border-t border-white/5 bg-surface-950/50 p-4 relative">
               {/* Playhead */}
               <motion.div 
                 initial={{ x: "0%" }}
@@ -197,7 +197,7 @@ export default function HomePage() {
     <div className="w-full flex flex-col">
       {/* Hero Section */}
       <section className="relative w-full pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[#09090f]" />
+        <div className="absolute inset-0 bg-surface-950" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
         
         <Container className="relative z-10">
@@ -269,7 +269,7 @@ export default function HomePage() {
         badge="Core Features"
         title="Everything you need to create"
         subtitle="A comprehensive toolkit for timeline-based video creation and large-scale batch generation."
-        className="bg-black/20"
+        className="bg-surface-925"
       >
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -280,7 +280,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="relative p-6 md:p-8 rounded-3xl bg-[#0a0a0f] border border-white/5 hover:-translate-y-1 hover:border-white/10 transition-all duration-300 group cursor-default shadow-xl overflow-hidden"
+                className="relative p-6 md:p-8 rounded-3xl bg-surface-900 border border-white/5 hover:-translate-y-1 hover:border-white/10 transition-all duration-300 group cursor-default shadow-xl overflow-hidden"
               >
                 {/* Top border highlight on hover */}
                 <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
@@ -352,7 +352,7 @@ export default function HomePage() {
                     <div className={`absolute inset-0 bg-gradient-to-br ${step.color} rounded-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-2xl`} />
                     
                     {/* Physical Card */}
-                    <div className="relative w-full h-full bg-[#0a0a0f] border border-white/10 rounded-3xl flex items-center justify-center group-hover:-translate-y-2 group-hover:border-white/30 transition-all duration-300 shadow-2xl overflow-hidden">
+                    <div className="relative w-full h-full bg-surface-900 border border-white/10 rounded-3xl flex items-center justify-center group-hover:-translate-y-2 group-hover:border-white/20 transition-all duration-300 shadow-xl overflow-hidden">
                       {/* Subtle internal gradient */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                       <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/30 group-hover:from-white group-hover:to-white/80 transition-all duration-300">
@@ -372,7 +372,7 @@ export default function HomePage() {
       </Section>
 
       {/* Use Cases */}
-      <Section className="!py-12 md:!py-20 relative bg-gradient-to-b from-transparent to-indigo-950/20">
+      <Section className="bg-surface-925">
         <Container>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -396,7 +396,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="p-8 rounded-3xl bg-[#0a0a0f] border border-white/5 hover:-translate-y-2 hover:border-indigo-500/30 transition-all duration-300 shadow-2xl relative overflow-hidden group"
+                className="p-8 rounded-3xl bg-surface-900 border border-white/5 hover:-translate-y-2 hover:border-indigo-500/30 transition-all duration-300 shadow-xl relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 text-indigo-400 flex items-center justify-center mb-6 border border-white/5 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all duration-300">
@@ -411,14 +411,14 @@ export default function HomePage() {
       </Section>
 
       {/* Trust / Security */}
-      <Section className="!pt-4 !pb-20">
+      <Section className="py-12 md:py-20">
         <Container>
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="rounded-full bg-[#0a0a0f] border border-white/10 px-8 py-6 md:px-16 md:py-8 relative overflow-hidden group shadow-2xl"
+            className="rounded-full bg-surface-900 border border-white/5 px-8 py-6 md:px-16 md:py-8 relative overflow-hidden group shadow-xl"
           >
             {/* Animated border glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/10 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -429,7 +429,7 @@ export default function HomePage() {
                   key={tp.title} 
                   className={`flex flex-col items-center text-center w-full ${i !== 0 ? 'pt-8 md:pt-0' : ''}`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                  <div className="w-12 h-12 rounded-full bg-surface-850 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-300 shadow-inner">
                     {tp.icon}
                   </div>
                   <h4 className="text-white font-bold mb-1">{tp.title}</h4>
