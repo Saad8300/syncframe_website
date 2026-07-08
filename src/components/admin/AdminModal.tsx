@@ -23,8 +23,8 @@ export default function AdminModal({
 }: AdminModalProps) {
   const maxW = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' }[size]
   const confirmClass = confirmVariant === 'danger'
-    ? 'bg-red-600 hover:bg-red-700 text-slate-900'
-    : 'bg-indigo-600 hover:bg-indigo-700 text-slate-900'
+    ? 'bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow active:scale-[0.99]'
+    : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm hover:shadow active:scale-[0.99]'
 
   return (
     <AnimatePresence>

@@ -74,8 +74,8 @@ export default function AdminSidebar({ activeTab, onTabChange, pendingCount, adm
                     onClick={() => onTabChange(item.id as TabId)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all group relative ${
                       isActive
-                        ? 'bg-white text-indigo-700 shadow-none border border-slate-200'
-                        : 'text-slate-500 hover:bg-slate-200 hover:text-slate-900 border border-transparent'
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-100/50'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
                     }`}
                   >
                     <span className={`${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'} transition-colors`}>

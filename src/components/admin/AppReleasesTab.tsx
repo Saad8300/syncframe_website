@@ -725,7 +725,7 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-slate-900 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-semibold"
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow-sm hover:shadow active:scale-[0.99] transition-all text-sm font-semibold"
         >
           <Plus size={16} /> Add Release
         </button>
@@ -1172,7 +1172,7 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
                   form="releaseForm"
                   type="submit"
                   disabled={uploadPhase === 'uploading' || uploadPhase === 'creating' || uploadPhase === 'attaching' || uploadPhase === 'done' || !!fileError || uploadPhase === 'paused'}
-                  className="px-6 py-2.5 bg-indigo-600 text-slate-900 rounded-xl text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-6 py-2.5 bg-indigo-500 text-white rounded-xl text-sm font-semibold hover:bg-indigo-600 shadow-sm hover:shadow active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                 >
                   {(uploadPhase === 'creating' || uploadPhase === 'uploading' || uploadPhase === 'attaching' || uploadPhase === 'paused') ? (
                     <><Loader2 size={15} className={`animate-spin ${uploadPhase === 'paused' ? 'invisible' : ''}`} /> Uploading…</>

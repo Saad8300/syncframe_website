@@ -110,7 +110,7 @@ export default function ChangelogTab({ changelogs, loading, onRefresh }: Changel
       <div className="flex justify-end">
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-slate-900 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow-sm hover:shadow active:scale-[0.99] transition-all text-sm font-medium"
         >
           <Plus size={16} /> Add Changelog
         </button>
@@ -267,7 +267,7 @@ export default function ChangelogTab({ changelogs, loading, onRefresh }: Changel
                 form="changelogForm"
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-indigo-600 text-slate-900 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-indigo-500 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 shadow-sm hover:shadow active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {saving ? 'Saving...' : 'Save Changelog'}
               </button>

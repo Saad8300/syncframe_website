@@ -88,7 +88,7 @@ export default function PaymentRequestsTab({ requests, loading, statusFilter, on
             onClick={() => onStatusFilterChange(f)}
             className={`px-3.5 py-1.5 rounded-xl text-sm font-medium border transition-all ${
               statusFilter === f
-                ? 'bg-indigo-600 text-slate-900 border-indigo-600 shadow-sm'
+                ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm'
                 : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >

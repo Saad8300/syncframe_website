@@ -105,7 +105,7 @@ export default function CouponsTab({ coupons, loading, onRefresh }: Props) {
       <div className="flex items-center justify-end mb-6">
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-slate-900 hover:bg-indigo-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm hover:shadow active:scale-[0.99] transition-all"
         >
           <Plus size={15} />
           Create Coupon
