@@ -1,9 +1,8 @@
 // src/components/admin/AppReleasesTab.tsx
-// Admin App Releases management with robust TUS resumable upload for large installer files.
+// Admin App Releases management with robust R2 multipart resumable upload for large installer files.
 
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as tus from 'tus-js-client'
 import {
   Plus, Edit2, Trash2, Download, AlertCircle, CheckCircle2,
   Monitor, Apple, Star, Upload, X, FileText, Loader2,
@@ -18,8 +17,6 @@ interface AppReleasesTabProps {
   loading: boolean
   onRefresh: () => void
 }
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -36,13 +33,6 @@ function formatDate(iso: string | null | undefined): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function buildStoragePath(platform: string, channel: string, version: string, arch: string, releaseId: string, uniqueId: string, fileName: string): string {
-  const safeVersion = version.replace(/^v/i, '').replace(/\s+/g, '-')
-  const safeArch = arch.replace(/\s+/g, '-')
-  const safeFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '-')
-  return `${platform}/${channel}/${safeVersion}/${safeArch}/${releaseId}/${uniqueId}-${safeFileName}`
-}
-
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   windows: ['.exe', '.zip', '.msi'],
   mac: ['.dmg', '.zip', '.pkg'],
@@ -54,7 +44,7 @@ function validateReleaseFile(file: File, platform: string): string | null {
   const allowed = ALLOWED_EXTENSIONS[platform] || []
   const hasValidExt = allowed.some(ext => name.endsWith(ext))
   if (!hasValidExt) {
-    return `This file type is not allowed for ${platform === 'windows' ? 'Windows' : 'macOS'} releases. Allowed: ${allowed.join(', ')}`
+    return `This file type is not allowed for ${platform === 'windows' ? 'Windows' : 'macOS'}. Allowed: ${allowed.join(', ')}`
   }
   return null
 }
@@ -118,9 +108,10 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
   
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle')
   const [uploadProgress, setUploadProgress] = useState(0)
-  const uploadRef = useRef<tus.Upload | null>(null)
-  const contextKeyRef = useRef<string | null>(null)
+  
+  const abortControllerRef = useRef<AbortController | null>(null)
   const uploadReleaseIdRef = useRef<string | null>(null)
+  const uploadUuidRef = useRef<string | null>(null)
   const uploadStoragePathRef = useRef<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -142,9 +133,10 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
     setSelectedFile(null)
     setUploadPhase('idle')
     setUploadProgress(0)
-    uploadRef.current = null
-    contextKeyRef.current = null
+    
+    abortControllerRef.current = null
     uploadReleaseIdRef.current = null
+    uploadUuidRef.current = null
     uploadStoragePathRef.current = null
 
     if (release) {
@@ -174,8 +166,8 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
   const handleCloseModal = () => {
     if (uploadPhase === 'uploading' || uploadPhase === 'creating' || uploadPhase === 'attaching') {
       if (!confirm('An upload is in progress. Are you sure you want to cancel?')) return
-      if (uploadRef.current) {
-        uploadRef.current.abort()
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort('Modal closed')
       }
     }
     setIsModalOpen(false)
@@ -207,8 +199,8 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
   }, [handleFileSelect])
 
   const handleRemoveFile = () => {
-    if (uploadRef.current && (uploadPhase === 'uploading' || uploadPhase === 'paused')) {
-      uploadRef.current.abort()
+    if (abortControllerRef.current && (uploadPhase === 'uploading' || uploadPhase === 'paused')) {
+      abortControllerRef.current.abort('File removed')
     }
     setSelectedFile(null)
     setFileError(null)
@@ -249,7 +241,7 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
     return Object.keys(errors).length === 0
   }
 
-  // ── Save / Upload (TUS) ────────────────────────────────────────────────────────
+  // ── Save / Upload (R2 Multipart) ────────────────────────────────────────────────────────
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -288,264 +280,192 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
       return
     }
 
-    // ── NEW/EXISTING: TUS upload flow ────────────────────────────────────────
+    // ── NEW/EXISTING: R2 S3 Multipart upload flow ────────────────────────────────────────
     if (!selectedFile) return
 
     const cleanVersion = form.version.trim().replace(/^v/i, '')
     const isReplacement = !!editingRelease
+    
+    abortControllerRef.current = new AbortController()
 
     try {
-      const { data: authData } = await supabase.auth.getUser()
-      const userId = authData.user?.id
-      if (!userId) throw new Error('Not authenticated')
-
-      const fileFingerprint = [
-        selectedFile.name, 
-        selectedFile.size, 
-        selectedFile.lastModified,
-        form.platform,
-        form.channel,
-        cleanVersion,
-        form.architecture
-      ].join('-')
-      
-      const contextKey = `release_upload_attempt:${userId}:${editingRelease?.id ? 'replace' : 'new'}:${editingRelease?.id || 'none'}:${fileFingerprint}`
-      contextKeyRef.current = contextKey
-      
-      const existingContextStr = sessionStorage.getItem(contextKey)
-      let contextData: { releaseId: string, uploadUuid: string, storagePath: string } | null = null
-
-      if (existingContextStr) {
-        try {
-          const parsed = JSON.parse(existingContextStr)
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-          
-          if (
-            parsed &&
-            typeof parsed.releaseId === 'string' && uuidRegex.test(parsed.releaseId) &&
-            typeof parsed.uploadUuid === 'string' && uuidRegex.test(parsed.uploadUuid) &&
-            typeof parsed.storagePath === 'string'
-          ) {
-            const expectedPrefix = `${form.platform}/${form.channel}/${cleanVersion}/${form.architecture}/${parsed.releaseId}/`
-            const sanitizedFilename = selectedFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '-')
-            const expectedObjectTail = `${parsed.uploadUuid}-${sanitizedFilename}`
-            
-            if (parsed.storagePath === expectedPrefix + expectedObjectTail) {
-              if (isReplacement) {
-                if (parsed.releaseId === editingRelease.id) {
-                   contextData = parsed
-                }
-              } else {
-                 const { data: releases, error: listErr } = await supabase.rpc('admin_list_app_releases')
-                 if (!listErr && releases) {
-                   const draftRelease = releases.find((r: any) => r.id === parsed.releaseId)
-                   if (draftRelease && !draftRelease.is_published && !draftRelease.is_latest && draftRelease.platform === form.platform && draftRelease.channel === form.channel && draftRelease.version === cleanVersion && draftRelease.architecture === form.architecture && (!draftRelease.storage_path || draftRelease.storage_path === parsed.storagePath)) {
-                      contextData = parsed
-                   }
-                 }
-              }
-            }
-          }
-          if (!contextData) {
-            sessionStorage.removeItem(contextKey)
-          }
-        } catch (e) {
-          sessionStorage.removeItem(contextKey)
-        }
-      }
-
+      // 1. Create DB Draft Record
       let releaseIdToUse = editingRelease?.id
-
       if (!isReplacement) {
-        if (contextData?.releaseId) {
-          releaseIdToUse = contextData.releaseId
-        } else {
-          // 1. Create DB Draft Record
-          setUploadPhase('creating')
-          const { data: releaseData, error: createError } = await supabase.rpc('admin_create_app_release_draft', {
-            p_platform: form.platform,
-            p_channel: form.channel,
-            p_version: cleanVersion,
-            p_title: form.title.trim(),
-            p_architecture: form.architecture,
-          })
-          if (createError) throw createError
-          releaseIdToUse = (releaseData as any)?.id
-          if (!releaseIdToUse) throw new Error('Could not get release ID after creation.')
-        }
+        setUploadPhase('creating')
+        const { data: releaseData, error: createError } = await supabase.rpc('admin_create_app_release_draft', {
+          p_platform: form.platform,
+          p_channel: form.channel,
+          p_version: cleanVersion,
+          p_title: form.title.trim(),
+          p_architecture: form.architecture,
+        })
+        if (createError) throw createError
+        releaseIdToUse = (releaseData as any)?.id
+        if (!releaseIdToUse) throw new Error('Could not get release ID after creation.')
       }
-
-      // Generate unique path
-      const uploadUuid = contextData?.uploadUuid || crypto.randomUUID()
-      const storagePath = contextData?.storagePath || buildStoragePath(
-        form.platform,
-        form.channel,
-        cleanVersion,
-        form.architecture,
-        releaseIdToUse!,
-        uploadUuid,
-        selectedFile.name
-      )
 
       uploadReleaseIdRef.current = releaseIdToUse!
-      uploadStoragePathRef.current = storagePath
 
-      if (!contextData) {
-        sessionStorage.setItem(contextKey, JSON.stringify({ releaseId: releaseIdToUse, uploadUuid, storagePath }))
-      }
+      // 2. Call create-release-upload Edge Function
+      setUploadPhase('creating')
+      const createRes = await supabase!.functions.invoke('create-release-upload', {
+        body: {
+          platform: form.platform,
+          channel: form.channel,
+          version: cleanVersion,
+          architecture: form.architecture,
+          file_name: selectedFile.name,
+          release_id: releaseIdToUse
+        }
+      })
+      if (createRes.error) throw createRes.error
+      if (createRes.data?.error) throw new Error(`Edge Function Error [${createRes.data.step || 'unknown'}]: ${createRes.data.error}`)
+      
+      const { uploadId, objectKey } = createRes.data
+      uploadUuidRef.current = uploadId
+      uploadStoragePathRef.current = objectKey
 
-      // 2. Upload via TUS
+      // 3. Upload parts
       setUploadPhase('uploading')
       setUploadProgress(0)
 
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-      if (!token) throw new Error('Missing authentication token for upload')
+      const CHUNK_SIZE = 15 * 1024 * 1024
+      const parts = []
+      let uploadedBytes = 0
 
-      const uploadUrl = `${SUPABASE_URL}/storage/v1/upload/resumable`
-
-      const upload = new tus.Upload(selectedFile, {
-        endpoint: uploadUrl,
-        retryDelays: [0, 3000, 5000, 10000, 20000],
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        uploadDataDuringCreation: true,
-        removeFingerprintOnSuccess: true,
-        fingerprint: (file) => {
-          return Promise.resolve(
-            ['tus', releaseIdToUse, storagePath, file.name, file.size, file.lastModified].join('-')
-          )
-        },
-        metadata: {
-          bucketName: 'app-releases',
-          objectName: storagePath,
-          contentType: selectedFile.type || 'application/octet-stream',
-          cacheControl: '3600',
-        },
-        chunkSize: 6 * 1024 * 1024,
-        onError: async function (tusError) {
-          setError(tusError.message || 'Upload interrupted')
-          setUploadPhase('error')
-        },
-        onProgress: function (bytesUploaded, bytesTotal) {
-          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(1)
-          setUploadProgress(parseFloat(percentage))
-        },
-        onSuccess: async function () {
-          try {
-            setUploadPhase('attaching')
-            
-            // 3. Atomically finalize everything
-            const { error: finalizeError } = await supabase!.rpc('admin_finalize_app_release_upload', {
-              p_release_id: releaseIdToUse,
-              p_storage_path: storagePath,
-              p_file_name: selectedFile.name,
-              p_file_size_bytes: selectedFile.size,
-              p_is_published: form.is_published,
-              p_is_latest: form.is_latest,
-              p_platform: form.platform,
-              p_channel: form.channel,
-              p_version: cleanVersion,
-              p_architecture: form.architecture,
-              p_title: form.title.trim(),
-              p_description: form.description.trim() || null,
-              p_release_notes: form.release_notes.trim() || null
-            })
-            
-            if (finalizeError) {
-              const { error: cleanupError } = await supabase!.storage.from('app-releases').remove([storagePath])
-              if (cleanupError) {
-                console.error("Cleanup failed:", cleanupError)
-                alert(`Upload failed, but we couldn't delete the temporary file. Please manually delete: ${storagePath}. Storage Error: ${cleanupError.message}`)
-              }
-              throw finalizeError
-            }
-
-            // 4. Cleanup old storage path if this was a replacement
-            if (isReplacement && editingRelease.storage_path && editingRelease.storage_path !== storagePath) {
-              const { error: removeOldError } = await supabase!.storage.from('app-releases').remove([editingRelease.storage_path])
-              if (removeOldError) {
-                 console.warn("Failed to remove old installer file:", removeOldError)
-                 alert(`Release successfully replaced, but we failed to delete the old installer file: ${removeOldError.message}`)
-              }
-            }
-
-            setUploadProgress(100)
-            setUploadPhase('done')
-            
-            // Clean up persistent context
-            if (contextKeyRef.current) {
-              sessionStorage.removeItem(contextKeyRef.current)
-              contextKeyRef.current = null
-            }
-            
-            setTimeout(() => { handleCloseModal(); onRefresh() }, 1200)
-
-          } catch (err: any) {
-            setError(err.message || 'Failed to finalize upload.')
-            setUploadPhase('error')
-          }
+      for (let i = 0; i < selectedFile.size; i += CHUNK_SIZE) {
+        if (abortControllerRef.current.signal.aborted) {
+          throw new Error('Upload cancelled')
         }
-      })
 
-      uploadRef.current = upload
-      
-      const previousUploads = await upload.findPreviousUploads()
-      if (previousUploads.length > 0) {
-        upload.resumeFromPreviousUpload(previousUploads[0])
-      }
-      
-      upload.start()
+        const partNumber = Math.floor(i / CHUNK_SIZE) + 1
+        const chunk = selectedFile.slice(i, i + CHUNK_SIZE)
 
-    } catch (err: any) {
-      setError(err.message || 'Failed to start upload.')
-      setUploadPhase('error')
-    }
-  }
+        // Retry loop for part
+        for (let attempt = 1; attempt <= 3; attempt++) {
+           try {
+              if (abortControllerRef.current.signal.aborted) throw new Error('Upload cancelled')
 
-  // ── TUS Controls ───────────────────────────────────────────────────────────────
+              const signRes = await supabase!.functions.invoke('sign-release-upload-part', {
+                body: { objectKey, uploadId, partNumber }
+              })
+              if (signRes.error) throw signRes.error
+              if (signRes.data?.error) throw new Error(`Edge Function Error [${signRes.data.step || 'unknown'}]: ${signRes.data.error}`)
 
-  const togglePauseUpload = () => {
-    if (!uploadRef.current) return
-    if (uploadPhase === 'uploading') {
-      uploadRef.current.abort()
-      setUploadPhase('paused')
-    } else if (uploadPhase === 'paused') {
-      uploadRef.current.start()
-      setUploadPhase('uploading')
-    }
-  }
+              const presignedUrl = signRes.data.signedUrl
 
-  const cancelUpload = async () => {
-    if (!uploadRef.current) return
-    const isDraft = !editingRelease
-    if (confirm(isDraft ? 'Cancel upload and discard file?' : 'Cancel replacement upload? (Existing release will be preserved)')) {
-      uploadRef.current.abort()
-      
-      const currentContextKey = contextKeyRef.current
-      
-      if (isDraft && uploadReleaseIdRef.current) {
-        if (uploadStoragePathRef.current) {
-           const { error: storageErr } = await supabase!.storage.from('app-releases').remove([uploadStoragePathRef.current])
-           if (storageErr) {
-             console.error("Cleanup error", storageErr)
-             alert(`Warning: Failed to cleanup temporary storage file: ${storageErr.message}. Recovery information preserved. Please try discarding again later.`)
-             return
+              const putRes = await fetch(presignedUrl, {
+                method: 'PUT',
+                body: chunk,
+                signal: abortControllerRef.current.signal
+              })
+              
+              if (!putRes.ok) {
+                 throw new Error(`Part upload failed with status ${putRes.status}`)
+              }
+
+              const etag = putRes.headers.get('etag') || putRes.headers.get('ETag')
+              if (!etag) throw new Error('Missing ETag from upload response')
+
+              parts.push({ PartNumber: partNumber, ETag: etag })
+              uploadedBytes += chunk.size
+              setUploadProgress(parseFloat(((uploadedBytes / selectedFile.size) * 100).toFixed(1)))
+              break; // success
+           } catch (e: any) {
+              if (e.name === 'AbortError' || e.message === 'Upload cancelled') {
+                 throw e // Bubble up cancel immediately
+              }
+              if (attempt === 3) throw new Error(`Failed to upload part ${partNumber} after 3 attempts: ${e.message}`)
+              await new Promise(resolve => setTimeout(resolve, 2000 * attempt))
            }
         }
+      }
+
+      if (abortControllerRef.current.signal.aborted) {
+        throw new Error('Upload cancelled')
+      }
+
+      // 4. Complete upload
+      setUploadPhase('attaching')
+      const completeRes = await supabase!.functions.invoke('complete-release-upload', {
+         body: {
+            objectKey,
+            uploadId,
+            parts,
+            release_id: releaseIdToUse,
+            file_name: selectedFile.name,
+            is_published: form.is_published,
+            is_latest: form.is_latest,
+            platform: form.platform,
+            channel: form.channel,
+            version: cleanVersion,
+            architecture: form.architecture,
+            title: form.title.trim(),
+            description: form.description.trim() || null,
+            release_notes: form.release_notes.trim() || null
+         }
+      })
+      
+      if (completeRes.error) throw completeRes.error
+      if (completeRes.data?.error) throw new Error(`Edge Function Error [${completeRes.data.step || 'unknown'}]: ${completeRes.data.error}`)
+
+      // 5. Cleanup old storage path if this was a replacement
+      if (isReplacement && editingRelease.storage_path && editingRelease.storage_path !== objectKey) {
+        if (editingRelease.storage_path.startsWith('r2-releases/')) {
+          await supabase!.functions.invoke('delete-release-object', { body: { objectKey: editingRelease.storage_path } }).catch(console.error)
+        } else {
+          await supabase.storage.from('app-releases').remove([editingRelease.storage_path]).catch(console.error)
+        }
+      }
+
+      setUploadProgress(100)
+      setUploadPhase('done')
+      setTimeout(() => { handleCloseModal(); onRefresh() }, 1200)
+
+    } catch (err: any) {
+      if (err.name === 'AbortError' || err.message === 'Upload cancelled') {
+        // Handled by cancelUpload
+        return
+      }
+      
+      setError(err.message || 'Failed to start upload.')
+      setUploadPhase('error')
+
+      if (uploadStoragePathRef.current && uploadUuidRef.current) {
+        supabase!.functions.invoke('abort-release-upload', {
+          body: {
+            objectKey: uploadStoragePathRef.current,
+            uploadId: uploadUuidRef.current
+          }
+        }).catch(console.error)
+      }
+    }
+  }
+
+  // ── Upload Controls ───────────────────────────────────────────────────────────────
+
+  const cancelUpload = async () => {
+    const isDraft = !editingRelease
+    if (confirm(isDraft ? 'Cancel upload and discard file?' : 'Cancel replacement upload? (Existing release will be preserved)')) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort('Upload cancelled')
+      }
+      
+      if (uploadStoragePathRef.current && uploadUuidRef.current) {
+        supabase!.functions.invoke('abort-release-upload', {
+          body: { objectKey: uploadStoragePathRef.current, uploadId: uploadUuidRef.current }
+        }).catch(console.error)
+      }
+      
+      if (isDraft && uploadReleaseIdRef.current) {
         const { error: dbErr } = await supabase!.rpc('admin_delete_app_release', { p_release_id: uploadReleaseIdRef.current })
         if (dbErr) {
           console.error("Cleanup error", dbErr)
-          alert(`Warning: Failed to delete draft release: ${dbErr.message}. Recovery information preserved.`)
+          alert(`Warning: Failed to delete draft release: ${dbErr.message}.`)
           return
         }
         onRefresh()
-      }
-
-      if (currentContextKey) {
-        sessionStorage.removeItem(currentContextKey)
-        contextKeyRef.current = null
       }
 
       setUploadPhase('idle')
@@ -599,26 +519,18 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
   const handleTestDownload = async (release: AppRelease) => {
     if (!supabase) return
     
-    // 1. Open blank window synchronously during original click to bypass popup blockers
     const popup = window.open('about:blank', '_blank')
-    
-    // 2. If blocked, stop before async work
     if (!popup) {
       alert('Allow pop-ups for Test Download')
       return
     }
     
     setTestingId(release.id)
-    
-    // 4. Safely sever opener access
     popup.opener = null
-    
-    // 5. Show temporary waiting message
     popup.document.write('Waiting for download URL...')
     
     try {
-      // 6. Await network request
-      const { data, error } = await supabase.functions.invoke('get-release-download', {
+      const { data, error } = await supabase!.functions.invoke('get-release-download', {
         body: { release_id: release.id }
       })
       if (error) throw error
@@ -626,10 +538,8 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
       const url = data?.url
       if (!url) throw new Error(data?.error || 'No download URL returned.')
       
-      // 7. On success, navigate existing handle
       popup.location.href = url
     } catch (err: any) {
-      // 8. On failure, close existing handle
       popup.close()
       const errMsg = err?.context?.json?.error || err.message || 'Test download failed'
       alert(`Download Error: ${errMsg}`)
@@ -673,9 +583,16 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
       }
 
       if (release.storage_path) {
-        const { error: storageError } = await supabase!.storage.from('app-releases').remove([release.storage_path])
-        if (storageError) {
-          throw new Error(`Failed to delete storage file: ${storageError.message}. The release is now unpublished but the file remains.`)
+        if (release.storage_path.startsWith('r2-releases/')) {
+           const { data, error } = await supabase!.functions.invoke('delete-release-object', { body: { objectKey: release.storage_path } })
+           if (error || data?.error) {
+              throw new Error(`Failed to delete R2 storage file: ${error?.message || data?.error}. Release remains in draft.`)
+           }
+        } else {
+           const { error: storageError } = await supabase!.storage.from('app-releases').remove([release.storage_path])
+           if (storageError) {
+             throw new Error(`Failed to delete storage file: ${storageError.message}. The release is now unpublished but the file remains.`)
+           }
         }
       }
       
@@ -890,7 +807,7 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
                     {editingRelease ? 'Edit Release' : 'Add App Release'}
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {editingRelease ? 'Update release metadata' : 'Upload an installer securely (supports resumable uploads)'}
+                    {editingRelease ? 'Update release metadata' : 'Upload an installer securely via R2'}
                   </p>
                 </div>
                 <button
@@ -1003,9 +920,6 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
                             
                             {(uploadPhase === 'uploading' || uploadPhase === 'paused') && (
                               <div className="flex items-center gap-1">
-                                <button type="button" onClick={togglePauseUpload} className="p-1.5 text-slate-500 hover:text-indigo-500 rounded bg-slate-100 border border-slate-200">
-                                  {uploadPhase === 'uploading' ? <Pause size={14} /> : <Play size={14} />}
-                                </button>
                                 <button type="button" onClick={cancelUpload} className="p-1.5 text-slate-500 hover:text-red-500 rounded bg-slate-100 border border-slate-200">
                                   <XCircle size={14} />
                                 </button>
@@ -1025,9 +939,9 @@ export default function AppReleasesTab({ releases, loading, onRefresh }: AppRele
                                 <span className="flex items-center gap-1.5">
                                   {uploadPhase === 'uploading' ? <Loader2 size={12} className="animate-spin text-indigo-500" /> : null}
                                   {uploadPhase === 'creating' ? 'Preparing database record…' :
-                                   uploadPhase === 'uploading' ? `Uploading...` :
+                                   uploadPhase === 'uploading' ? `Uploading to R2...` :
                                    uploadPhase === 'paused' ? `Upload paused` :
-                                   'Finalizing attachment…'}
+                                   'Finalizing metadata…'}
                                 </span>
                                 <span>{uploadProgress}%</span>
                               </div>

@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
+import { GetObjectCommand } from "npm:@aws-sdk/client-s3"
+import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner"
+import { getS3Client, getR2BucketName } from "../_shared/s3.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -65,7 +68,8 @@ serve(async (req) => {
         global: { headers: { Authorization: authHeader } },
       })
 
-      const { data: { user }, error: userError } = await supabaseAuth.auth.getUser()
+      const jwt = authHeader.replace(/^Bearer\s+/i, '');
+      const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(jwt);
       if (userError || !user) {
         return new Response(
           JSON.stringify({ error: 'Unauthorized. Invalid authentication token.' }),
@@ -89,29 +93,57 @@ serve(async (req) => {
 
     // Case 1: Managed storage release
     if (release.storage_path) {
-      const { data: signedData, error: signedError } = await supabaseAdmin
-        .storage
-        .from('app-releases')
-        .createSignedUrl(release.storage_path, 900) // 15 minutes
+      if (release.storage_path.startsWith('r2-releases/')) {
+        try {
+          const s3 = getS3Client()
+          const command = new GetObjectCommand({
+            Bucket: getR2BucketName(),
+            Key: release.storage_path
+          })
+          const signedUrl = await getSignedUrl(s3, command, { expiresIn: 900 })
 
-      if (signedError || !signedData?.signedUrl) {
+          return new Response(
+            JSON.stringify({
+              url: signedUrl,
+              file_name: release.file_name,
+              version: release.version,
+              platform: release.platform,
+              architecture: release.architecture,
+              source: 'r2-storage'
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
+          )
+        } catch (r2Error) {
+          return new Response(
+            JSON.stringify({ error: 'Download temporarily unavailable (R2)' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, status: 500 }
+          )
+        }
+      } else {
+        const { data: signedData, error: signedError } = await supabaseAdmin
+          .storage
+          .from('app-releases')
+          .createSignedUrl(release.storage_path, 900) // 15 minutes
+
+        if (signedError || !signedData?.signedUrl) {
+          return new Response(
+            JSON.stringify({ error: 'Download temporarily unavailable' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, status: 500 }
+          )
+        }
+
         return new Response(
-          JSON.stringify({ error: 'Download temporarily unavailable' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, status: 500 }
+          JSON.stringify({
+            url: signedData.signedUrl,
+            file_name: release.file_name,
+            version: release.version,
+            platform: release.platform,
+            architecture: release.architecture,
+            source: 'storage'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
         )
       }
-
-      return new Response(
-        JSON.stringify({
-          url: signedData.signedUrl,
-          file_name: release.file_name,
-          version: release.version,
-          platform: release.platform,
-          architecture: release.architecture,
-          source: 'storage'
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
-      )
     }
 
     // Case 2: Legacy external URL release
